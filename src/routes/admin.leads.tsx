@@ -290,6 +290,7 @@ function NewLeadDialog({ onCreated }: { onCreated: () => void }) {
   const mutation = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.from("leads").insert({
+        lead_id: "",
         company_name: form.company_name,
         contact_name: form.contact_name,
         email: form.email,
