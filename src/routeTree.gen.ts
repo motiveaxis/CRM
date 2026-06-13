@@ -10,11 +10,23 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ClientSupportRouteImport } from './routes/client.support'
 import { Route as ClientLoginRouteImport } from './routes/client.login'
+import { Route as ClientDocumentsRouteImport } from './routes/client.documents'
 import { Route as ClientDashboardRouteImport } from './routes/client.dashboard'
+import { Route as ClientAutomationsRouteImport } from './routes/client.automations'
+import { Route as ClientApiUsageRouteImport } from './routes/client.api-usage'
+import { Route as AdminTeamRouteImport } from './routes/admin.team'
+import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminSalesRouteImport } from './routes/admin.sales'
+import { Route as AdminReportsRouteImport } from './routes/admin.reports'
+import { Route as AdminPortalsRouteImport } from './routes/admin.portals'
+import { Route as AdminPipelineRouteImport } from './routes/admin.pipeline'
+import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
 import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminLeadsRouteImport } from './routes/admin.leads'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
+import { Route as AdminClientsRouteImport } from './routes/admin.clients'
 import { Route as AdminLeadsLeadIdRouteImport } from './routes/admin.leads.$leadId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -22,14 +34,69 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientSupportRoute = ClientSupportRouteImport.update({
+  id: '/client/support',
+  path: '/client/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClientLoginRoute = ClientLoginRouteImport.update({
   id: '/client/login',
   path: '/client/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientDocumentsRoute = ClientDocumentsRouteImport.update({
+  id: '/client/documents',
+  path: '/client/documents',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ClientDashboardRoute = ClientDashboardRouteImport.update({
   id: '/client/dashboard',
   path: '/client/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientAutomationsRoute = ClientAutomationsRouteImport.update({
+  id: '/client/automations',
+  path: '/client/automations',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientApiUsageRoute = ClientApiUsageRouteImport.update({
+  id: '/client/api-usage',
+  path: '/client/api-usage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTeamRoute = AdminTeamRouteImport.update({
+  id: '/admin/team',
+  path: '/admin/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSettingsRoute = AdminSettingsRouteImport.update({
+  id: '/admin/settings',
+  path: '/admin/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSalesRoute = AdminSalesRouteImport.update({
+  id: '/admin/sales',
+  path: '/admin/sales',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminReportsRoute = AdminReportsRouteImport.update({
+  id: '/admin/reports',
+  path: '/admin/reports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPortalsRoute = AdminPortalsRouteImport.update({
+  id: '/admin/portals',
+  path: '/admin/portals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminPipelineRoute = AdminPipelineRouteImport.update({
+  id: '/admin/pipeline',
+  path: '/admin/pipeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminMarketingRoute = AdminMarketingRouteImport.update({
+  id: '/admin/marketing',
+  path: '/admin/marketing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
@@ -47,6 +114,11 @@ const AdminDashboardRoute = AdminDashboardRouteImport.update({
   path: '/admin/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminClientsRoute = AdminClientsRouteImport.update({
+  id: '/admin/clients',
+  path: '/admin/clients',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLeadsLeadIdRoute = AdminLeadsLeadIdRouteImport.update({
   id: '/$leadId',
   path: '/$leadId',
@@ -55,69 +127,153 @@ const AdminLeadsLeadIdRoute = AdminLeadsLeadIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin/clients': typeof AdminClientsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/leads': typeof AdminLeadsRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/pipeline': typeof AdminPipelineRoute
+  '/admin/portals': typeof AdminPortalsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/sales': typeof AdminSalesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/team': typeof AdminTeamRoute
+  '/client/api-usage': typeof ClientApiUsageRoute
+  '/client/automations': typeof ClientAutomationsRoute
   '/client/dashboard': typeof ClientDashboardRoute
+  '/client/documents': typeof ClientDocumentsRoute
   '/client/login': typeof ClientLoginRoute
+  '/client/support': typeof ClientSupportRoute
   '/admin/leads/$leadId': typeof AdminLeadsLeadIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/clients': typeof AdminClientsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/leads': typeof AdminLeadsRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/pipeline': typeof AdminPipelineRoute
+  '/admin/portals': typeof AdminPortalsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/sales': typeof AdminSalesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/team': typeof AdminTeamRoute
+  '/client/api-usage': typeof ClientApiUsageRoute
+  '/client/automations': typeof ClientAutomationsRoute
   '/client/dashboard': typeof ClientDashboardRoute
+  '/client/documents': typeof ClientDocumentsRoute
   '/client/login': typeof ClientLoginRoute
+  '/client/support': typeof ClientSupportRoute
   '/admin/leads/$leadId': typeof AdminLeadsLeadIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin/clients': typeof AdminClientsRoute
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/leads': typeof AdminLeadsRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
+  '/admin/marketing': typeof AdminMarketingRoute
+  '/admin/pipeline': typeof AdminPipelineRoute
+  '/admin/portals': typeof AdminPortalsRoute
+  '/admin/reports': typeof AdminReportsRoute
+  '/admin/sales': typeof AdminSalesRoute
+  '/admin/settings': typeof AdminSettingsRoute
+  '/admin/team': typeof AdminTeamRoute
+  '/client/api-usage': typeof ClientApiUsageRoute
+  '/client/automations': typeof ClientAutomationsRoute
   '/client/dashboard': typeof ClientDashboardRoute
+  '/client/documents': typeof ClientDocumentsRoute
   '/client/login': typeof ClientLoginRoute
+  '/client/support': typeof ClientSupportRoute
   '/admin/leads/$leadId': typeof AdminLeadsLeadIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin/clients'
     | '/admin/dashboard'
     | '/admin/leads'
     | '/admin/login'
+    | '/admin/marketing'
+    | '/admin/pipeline'
+    | '/admin/portals'
+    | '/admin/reports'
+    | '/admin/sales'
+    | '/admin/settings'
+    | '/admin/team'
+    | '/client/api-usage'
+    | '/client/automations'
     | '/client/dashboard'
+    | '/client/documents'
     | '/client/login'
+    | '/client/support'
     | '/admin/leads/$leadId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin/clients'
     | '/admin/dashboard'
     | '/admin/leads'
     | '/admin/login'
+    | '/admin/marketing'
+    | '/admin/pipeline'
+    | '/admin/portals'
+    | '/admin/reports'
+    | '/admin/sales'
+    | '/admin/settings'
+    | '/admin/team'
+    | '/client/api-usage'
+    | '/client/automations'
     | '/client/dashboard'
+    | '/client/documents'
     | '/client/login'
+    | '/client/support'
     | '/admin/leads/$leadId'
   id:
     | '__root__'
     | '/'
+    | '/admin/clients'
     | '/admin/dashboard'
     | '/admin/leads'
     | '/admin/login'
+    | '/admin/marketing'
+    | '/admin/pipeline'
+    | '/admin/portals'
+    | '/admin/reports'
+    | '/admin/sales'
+    | '/admin/settings'
+    | '/admin/team'
+    | '/client/api-usage'
+    | '/client/automations'
     | '/client/dashboard'
+    | '/client/documents'
     | '/client/login'
+    | '/client/support'
     | '/admin/leads/$leadId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminClientsRoute: typeof AdminClientsRoute
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminLeadsRoute: typeof AdminLeadsRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminMarketingRoute: typeof AdminMarketingRoute
+  AdminPipelineRoute: typeof AdminPipelineRoute
+  AdminPortalsRoute: typeof AdminPortalsRoute
+  AdminReportsRoute: typeof AdminReportsRoute
+  AdminSalesRoute: typeof AdminSalesRoute
+  AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminTeamRoute: typeof AdminTeamRoute
+  ClientApiUsageRoute: typeof ClientApiUsageRoute
+  ClientAutomationsRoute: typeof ClientAutomationsRoute
   ClientDashboardRoute: typeof ClientDashboardRoute
+  ClientDocumentsRoute: typeof ClientDocumentsRoute
   ClientLoginRoute: typeof ClientLoginRoute
+  ClientSupportRoute: typeof ClientSupportRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -129,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/client/support': {
+      id: '/client/support'
+      path: '/client/support'
+      fullPath: '/client/support'
+      preLoaderRoute: typeof ClientSupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/client/login': {
       id: '/client/login'
       path: '/client/login'
@@ -136,11 +299,81 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/client/documents': {
+      id: '/client/documents'
+      path: '/client/documents'
+      fullPath: '/client/documents'
+      preLoaderRoute: typeof ClientDocumentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/client/dashboard': {
       id: '/client/dashboard'
       path: '/client/dashboard'
       fullPath: '/client/dashboard'
       preLoaderRoute: typeof ClientDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/client/automations': {
+      id: '/client/automations'
+      path: '/client/automations'
+      fullPath: '/client/automations'
+      preLoaderRoute: typeof ClientAutomationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/client/api-usage': {
+      id: '/client/api-usage'
+      path: '/client/api-usage'
+      fullPath: '/client/api-usage'
+      preLoaderRoute: typeof ClientApiUsageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/team': {
+      id: '/admin/team'
+      path: '/admin/team'
+      fullPath: '/admin/team'
+      preLoaderRoute: typeof AdminTeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/settings': {
+      id: '/admin/settings'
+      path: '/admin/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/sales': {
+      id: '/admin/sales'
+      path: '/admin/sales'
+      fullPath: '/admin/sales'
+      preLoaderRoute: typeof AdminSalesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/reports': {
+      id: '/admin/reports'
+      path: '/admin/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AdminReportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/portals': {
+      id: '/admin/portals'
+      path: '/admin/portals'
+      fullPath: '/admin/portals'
+      preLoaderRoute: typeof AdminPortalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/pipeline': {
+      id: '/admin/pipeline'
+      path: '/admin/pipeline'
+      fullPath: '/admin/pipeline'
+      preLoaderRoute: typeof AdminPipelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/marketing': {
+      id: '/admin/marketing'
+      path: '/admin/marketing'
+      fullPath: '/admin/marketing'
+      preLoaderRoute: typeof AdminMarketingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/login': {
@@ -162,6 +395,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/dashboard'
       fullPath: '/admin/dashboard'
       preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/clients': {
+      id: '/admin/clients'
+      path: '/admin/clients'
+      fullPath: '/admin/clients'
+      preLoaderRoute: typeof AdminClientsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/leads/$leadId': {
@@ -188,12 +428,34 @@ const AdminLeadsRouteWithChildren = AdminLeadsRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminClientsRoute: AdminClientsRoute,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminLeadsRoute: AdminLeadsRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
+  AdminMarketingRoute: AdminMarketingRoute,
+  AdminPipelineRoute: AdminPipelineRoute,
+  AdminPortalsRoute: AdminPortalsRoute,
+  AdminReportsRoute: AdminReportsRoute,
+  AdminSalesRoute: AdminSalesRoute,
+  AdminSettingsRoute: AdminSettingsRoute,
+  AdminTeamRoute: AdminTeamRoute,
+  ClientApiUsageRoute: ClientApiUsageRoute,
+  ClientAutomationsRoute: ClientAutomationsRoute,
   ClientDashboardRoute: ClientDashboardRoute,
+  ClientDocumentsRoute: ClientDocumentsRoute,
   ClientLoginRoute: ClientLoginRoute,
+  ClientSupportRoute: ClientSupportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
