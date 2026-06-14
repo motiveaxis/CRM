@@ -272,69 +272,74 @@ export type Database = {
           },
         ]
       }
-      communications: {
+      configs: {
         Row: {
-          body: string | null
+          build_scope: string | null
+          build_status: string | null
           client_id: string | null
-          created_at: string
+          client_name: string | null
+          config_id: string | null
+          created_at: string | null
+          credentials: Json | null
+          gtm_container_id: string | null
+          hosting_preference: string | null
           id: string
-          lead_id: string | null
-          meeting_attended: boolean | null
-          opened_at: string | null
-          sent_at: string | null
-          sent_by: string | null
-          sentiment: string | null
-          subject: string | null
-          type: string | null
+          lead_id: string
+          n8n_instance_url: string | null
+          notes: string | null
+          onboarded_at: string | null
+          source: string | null
+          updated_at: string | null
         }
         Insert: {
-          body?: string | null
+          build_scope?: string | null
+          build_status?: string | null
           client_id?: string | null
-          created_at?: string
+          client_name?: string | null
+          config_id?: string | null
+          created_at?: string | null
+          credentials?: Json | null
+          gtm_container_id?: string | null
+          hosting_preference?: string | null
           id?: string
-          lead_id?: string | null
-          meeting_attended?: boolean | null
-          opened_at?: string | null
-          sent_at?: string | null
-          sent_by?: string | null
-          sentiment?: string | null
-          subject?: string | null
-          type?: string | null
+          lead_id: string
+          n8n_instance_url?: string | null
+          notes?: string | null
+          onboarded_at?: string | null
+          source?: string | null
+          updated_at?: string | null
         }
         Update: {
-          body?: string | null
+          build_scope?: string | null
+          build_status?: string | null
           client_id?: string | null
-          created_at?: string
+          client_name?: string | null
+          config_id?: string | null
+          created_at?: string | null
+          credentials?: Json | null
+          gtm_container_id?: string | null
+          hosting_preference?: string | null
           id?: string
-          lead_id?: string | null
-          meeting_attended?: boolean | null
-          opened_at?: string | null
-          sent_at?: string | null
-          sent_by?: string | null
-          sentiment?: string | null
-          subject?: string | null
-          type?: string | null
+          lead_id?: string
+          n8n_instance_url?: string | null
+          notes?: string | null
+          onboarded_at?: string | null
+          source?: string | null
+          updated_at?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "communications_client_id_fkey"
+            foreignKeyName: "configs_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "communications_lead_id_fkey"
+            foreignKeyName: "configs_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "communications_sent_by_fkey"
-            columns: ["sent_by"]
-            isOneToOne: false
-            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
@@ -489,6 +494,97 @@ export type Database = {
         }
         Relationships: []
       }
+      interactions: {
+        Row: {
+          body: string | null
+          client_id: string | null
+          content_summary: string | null
+          conversion_probability: string | null
+          created_at: string
+          id: string
+          interaction_id: string | null
+          lead_id: string | null
+          meeting_attended: boolean | null
+          meeting_outcome: string | null
+          next_action: string | null
+          next_action_due: string | null
+          opened_at: string | null
+          requires_human_review: boolean | null
+          sent_at: string | null
+          sent_by: string | null
+          sentiment: string | null
+          source: string | null
+          subject: string | null
+          type: string | null
+        }
+        Insert: {
+          body?: string | null
+          client_id?: string | null
+          content_summary?: string | null
+          conversion_probability?: string | null
+          created_at?: string
+          id?: string
+          interaction_id?: string | null
+          lead_id?: string | null
+          meeting_attended?: boolean | null
+          meeting_outcome?: string | null
+          next_action?: string | null
+          next_action_due?: string | null
+          opened_at?: string | null
+          requires_human_review?: boolean | null
+          sent_at?: string | null
+          sent_by?: string | null
+          sentiment?: string | null
+          source?: string | null
+          subject?: string | null
+          type?: string | null
+        }
+        Update: {
+          body?: string | null
+          client_id?: string | null
+          content_summary?: string | null
+          conversion_probability?: string | null
+          created_at?: string
+          id?: string
+          interaction_id?: string | null
+          lead_id?: string | null
+          meeting_attended?: boolean | null
+          meeting_outcome?: string | null
+          next_action?: string | null
+          next_action_due?: string | null
+          opened_at?: string | null
+          requires_human_review?: boolean | null
+          sent_at?: string | null
+          sent_by?: string | null
+          sentiment?: string | null
+          source?: string | null
+          subject?: string | null
+          type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communications_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communications_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           assigned_to: string | null
@@ -496,15 +592,22 @@ export type Database = {
           contact_name: string | null
           created_at: string
           email: string
+          email_type: string | null
           first_name: string
+          goals: Json | null
+          hermes_lead_id: string | null
           id: string
           last_name: string | null
           lead_id: string
           notes: string | null
+          pain_points: Json | null
           phone: string | null
           priority: string | null
+          quantified_data: Json | null
           source: string | null
+          source_platform: string | null
           status: string
+          tool_stack: Json | null
           updated_at: string
           utm_campaign: string | null
           utm_content: string | null
@@ -519,15 +622,22 @@ export type Database = {
           contact_name?: string | null
           created_at?: string
           email: string
+          email_type?: string | null
           first_name: string
+          goals?: Json | null
+          hermes_lead_id?: string | null
           id?: string
           last_name?: string | null
           lead_id: string
           notes?: string | null
+          pain_points?: Json | null
           phone?: string | null
           priority?: string | null
+          quantified_data?: Json | null
           source?: string | null
+          source_platform?: string | null
           status?: string
+          tool_stack?: Json | null
           updated_at?: string
           utm_campaign?: string | null
           utm_content?: string | null
@@ -542,15 +652,22 @@ export type Database = {
           contact_name?: string | null
           created_at?: string
           email?: string
+          email_type?: string | null
           first_name?: string
+          goals?: Json | null
+          hermes_lead_id?: string | null
           id?: string
           last_name?: string | null
           lead_id?: string
           notes?: string | null
+          pain_points?: Json | null
           phone?: string | null
           priority?: string | null
+          quantified_data?: Json | null
           source?: string | null
+          source_platform?: string | null
           status?: string
+          tool_stack?: Json | null
           updated_at?: string
           utm_campaign?: string | null
           utm_content?: string | null
@@ -595,6 +712,8 @@ export type Database = {
       }
       pipeline_stages: {
         Row: {
+          agent_action: string | null
+          agent_owner: string | null
           color: string | null
           id: string
           name: string
@@ -602,6 +721,8 @@ export type Database = {
           slug: string
         }
         Insert: {
+          agent_action?: string | null
+          agent_owner?: string | null
           color?: string | null
           id?: string
           name: string
@@ -609,6 +730,8 @@ export type Database = {
           slug: string
         }
         Update: {
+          agent_action?: string | null
+          agent_owner?: string | null
           color?: string | null
           id?: string
           name?: string
@@ -617,23 +740,96 @@ export type Database = {
         }
         Relationships: []
       }
+      qc_records: {
+        Row: {
+          agent_reviewed: string | null
+          approved_output_ref: string | null
+          corrections_applied: Json | null
+          created_at: string | null
+          id: string
+          issues_found: Json | null
+          lead_id: string
+          notes: string | null
+          qc_id: string | null
+          qc_status: string
+          report_id: string | null
+          reviewed_at: string | null
+          source: string | null
+        }
+        Insert: {
+          agent_reviewed?: string | null
+          approved_output_ref?: string | null
+          corrections_applied?: Json | null
+          created_at?: string | null
+          id?: string
+          issues_found?: Json | null
+          lead_id: string
+          notes?: string | null
+          qc_id?: string | null
+          qc_status?: string
+          report_id?: string | null
+          reviewed_at?: string | null
+          source?: string | null
+        }
+        Update: {
+          agent_reviewed?: string | null
+          approved_output_ref?: string | null
+          corrections_applied?: Json | null
+          created_at?: string | null
+          id?: string
+          issues_found?: Json | null
+          lead_id?: string
+          notes?: string | null
+          qc_id?: string | null
+          qc_status?: string
+          report_id?: string | null
+          reviewed_at?: string | null
+          source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "qc_records_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "qc_records_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           build_approach: string | null
+          core_automation_category: string | null
           created_at: string
           current_state_description: string | null
+          current_state_json: Json | null
           diagnosis_summary: string | null
           future_state_description: string | null
+          future_state_json: Json | null
+          hermes_report_id: string | null
           hours_saved_estimate: number | null
           id: string
+          implementation_approach: Json | null
           lead_id: string
           pdf_generated_at: string | null
           pdf_url: string | null
           pricing_tier: string | null
           pricing_value: number | null
+          qc_approved_at: string | null
+          qc_status: string | null
+          recommended_stack: Json | null
           report_id: string
           report_status: string
+          roi_summary: Json | null
           sent_at: string | null
+          source: string | null
           stack_recommendation: Json | null
           updated_at: string
           vertical: string
@@ -641,20 +837,30 @@ export type Database = {
         }
         Insert: {
           build_approach?: string | null
+          core_automation_category?: string | null
           created_at?: string
           current_state_description?: string | null
+          current_state_json?: Json | null
           diagnosis_summary?: string | null
           future_state_description?: string | null
+          future_state_json?: Json | null
+          hermes_report_id?: string | null
           hours_saved_estimate?: number | null
           id?: string
+          implementation_approach?: Json | null
           lead_id: string
           pdf_generated_at?: string | null
           pdf_url?: string | null
           pricing_tier?: string | null
           pricing_value?: number | null
+          qc_approved_at?: string | null
+          qc_status?: string | null
+          recommended_stack?: Json | null
           report_id: string
           report_status?: string
+          roi_summary?: Json | null
           sent_at?: string | null
+          source?: string | null
           stack_recommendation?: Json | null
           updated_at?: string
           vertical: string
@@ -662,20 +868,30 @@ export type Database = {
         }
         Update: {
           build_approach?: string | null
+          core_automation_category?: string | null
           created_at?: string
           current_state_description?: string | null
+          current_state_json?: Json | null
           diagnosis_summary?: string | null
           future_state_description?: string | null
+          future_state_json?: Json | null
+          hermes_report_id?: string | null
           hours_saved_estimate?: number | null
           id?: string
+          implementation_approach?: Json | null
           lead_id?: string
           pdf_generated_at?: string | null
           pdf_url?: string | null
           pricing_tier?: string | null
           pricing_value?: number | null
+          qc_approved_at?: string | null
+          qc_status?: string | null
+          recommended_stack?: Json | null
           report_id?: string
           report_status?: string
+          roi_summary?: Json | null
           sent_at?: string | null
+          source?: string | null
           stack_recommendation?: Json | null
           updated_at?: string
           vertical?: string

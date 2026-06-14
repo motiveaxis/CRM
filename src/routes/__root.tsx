@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { useHermesRealtime } from "@/hooks/use-hermes-realtime";
 
 function NotFoundComponent() {
   return (
@@ -125,6 +126,8 @@ function RootComponent() {
     });
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
+
+  useHermesRealtime(queryClient);
 
   return (
     <QueryClientProvider client={queryClient}>
