@@ -41,6 +41,8 @@ interface Lead {
   id: string;
   lead_id: string;
   company_name: string;
+  first_name: string;
+  last_name: string | null;
   contact_name: string;
   email: string;
   phone: string | null;
@@ -49,6 +51,7 @@ interface Lead {
   priority: string | null;
   status: string;
   created_at: string;
+  updated_at: string;
 }
 
 const STATUS_OPTIONS = ["new", "contacted", "qualified", "report_sent", "negotiation", "closed_won", "closed_lost"];
