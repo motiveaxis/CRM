@@ -108,7 +108,9 @@ function LeadDetail() {
           <div className="ma-label">Lead profile</div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Company" value={form.company_name} onChange={(v) => setForm({ ...form, company_name: v })} />
-            <Field label="Contact" value={form.contact_name} onChange={(v) => setForm({ ...form, contact_name: v })} />
+            <div />
+            <Field label="First name" value={form.first_name ?? ""} onChange={(v) => setForm({ ...form, first_name: v })} />
+            <Field label="Last name" value={form.last_name ?? ""} onChange={(v) => setForm({ ...form, last_name: v })} />
             <Field label="Email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
             <Field label="Phone" value={form.phone ?? ""} onChange={(v) => setForm({ ...form, phone: v })} />
             <Field label="Source" value={form.source ?? ""} onChange={(v) => setForm({ ...form, source: v })} />
