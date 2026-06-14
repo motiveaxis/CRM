@@ -47,7 +47,8 @@ function LeadDetail() {
     mutationFn: async () => {
       const { error } = await supabase.from("leads").update({
         company_name: form.company_name,
-        contact_name: form.contact_name,
+        first_name: form.first_name,
+        last_name: form.last_name,
         email: form.email,
         phone: form.phone,
         source: form.source,
