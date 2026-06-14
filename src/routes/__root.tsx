@@ -126,6 +126,8 @@ function RootComponent() {
     return () => sub.subscription.unsubscribe();
   }, [router, queryClient]);
 
+  useHermesRealtime(queryClient);
+
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
