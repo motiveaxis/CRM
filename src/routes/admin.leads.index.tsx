@@ -26,7 +26,7 @@ import {
 import { toast } from "sonner";
 import { Plus, Download, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 
-export const Route = createFileRoute("/admin/leads")({
+export const Route = createFileRoute("/admin/leads/")({
   head: () => ({ meta: [{ title: "Leads — MotiveAxis CRM" }] }),
   component: () => (
     <StaffGuard>
