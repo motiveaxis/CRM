@@ -88,9 +88,14 @@ function LeadDetail() {
           <Link to="/admin/leads" className="ma-label inline-flex items-center gap-1 hover:text-white">
             <ChevronLeft size={12} /> Back to leads
           </Link>
-          <div className="flex items-baseline gap-3 mt-2">
+          <div className="flex items-baseline gap-3 mt-2 flex-wrap">
             <h1>{form.company_name}</h1>
             <span className="font-mono text-sm text-[color:var(--text-secondary)]">{form.lead_id}</span>
+            <span className="font-mono text-xs text-[color:var(--text-secondary)]">•</span>
+            <span className="font-mono text-xs text-[color:var(--text-secondary)]">
+              {form.hermes_lead_id ?? "Hermes ID: Pending"}
+            </span>
+            <EmailTypeBadge type={form.email_type} />
           </div>
         </div>
         <div className="flex gap-2">
