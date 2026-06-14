@@ -493,10 +493,12 @@ export type Database = {
         Row: {
           assigned_to: string | null
           company_name: string
-          contact_name: string
+          contact_name: string | null
           created_at: string
           email: string
+          first_name: string
           id: string
+          last_name: string | null
           lead_id: string
           notes: string | null
           phone: string | null
@@ -514,10 +516,12 @@ export type Database = {
         Insert: {
           assigned_to?: string | null
           company_name: string
-          contact_name: string
+          contact_name?: string | null
           created_at?: string
           email: string
+          first_name: string
           id?: string
+          last_name?: string | null
           lead_id: string
           notes?: string | null
           phone?: string | null
@@ -535,10 +539,12 @@ export type Database = {
         Update: {
           assigned_to?: string | null
           company_name?: string
-          contact_name?: string
+          contact_name?: string | null
           created_at?: string
           email?: string
+          first_name?: string
           id?: string
+          last_name?: string | null
           lead_id?: string
           notes?: string | null
           phone?: string | null

@@ -26,7 +26,7 @@ import {
 import { toast } from "sonner";
 import { Plus, Download, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
 
-export const Route = createFileRoute("/admin/leads")({
+export const Route = createFileRoute("/admin/leads/")({
   head: () => ({ meta: [{ title: "Leads — MotiveAxis CRM" }] }),
   component: () => (
     <StaffGuard>
@@ -41,6 +41,8 @@ interface Lead {
   id: string;
   lead_id: string;
   company_name: string;
+  first_name: string;
+  last_name: string | null;
   contact_name: string;
   email: string;
   phone: string | null;
@@ -49,6 +51,7 @@ interface Lead {
   priority: string | null;
   status: string;
   created_at: string;
+  updated_at: string;
 }
 
 const STATUS_OPTIONS = ["new", "contacted", "qualified", "report_sent", "negotiation", "closed_won", "closed_lost"];
@@ -72,13 +75,13 @@ function LeadsList() {
     queryFn: async () => {
       let q = supabase
         .from("leads")
-        .select("id, lead_id, company_name, contact_name, email, phone, source, vertical, priority, status, created_at", { count: "exact" });
+        .select("id, lead_id, company_name, first_name, last_name, contact_name, email, phone, source, vertical, priority, status, created_at, updated_at", { count: "exact" });
 
       if (statusFilter !== "all") q = q.eq("status", statusFilter);
       if (priorityFilter !== "all") q = q.eq("priority", priorityFilter);
       if (search.trim()) {
         const s = `%${search.trim()}%`;
-        q = q.or(`company_name.ilike.${s},contact_name.ilike.${s},email.ilike.${s},lead_id.ilike.${s}`);
+        q = q.or(`company_name.ilike.${s},first_name.ilike.${s},last_name.ilike.${s},email.ilike.${s},lead_id.ilike.${s}`);
       }
       q = q.order(sortBy, { ascending: sortDir === "asc" });
       q = q.range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
@@ -206,14 +209,15 @@ function LeadsList() {
                     </Link>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="text-white">{l.contact_name}</div>
+                    <div className="text-white">{[l.first_name, l.last_name].filter(Boolean).join(" ")}</div>
                     <div className="text-[11px] text-[color:var(--text-secondary)]">{l.email}</div>
                   </td>
                   <td className="px-4 py-3 text-[color:var(--text-secondary)]">{l.source ?? "—"}</td>
                   <td className="px-4 py-3"><PriorityPill priority={l.priority} /></td>
                   <td className="px-4 py-3"><StatusPill status={l.status} /></td>
                   <td className="px-4 py-3 font-mono text-[11px] text-[color:var(--text-secondary)]">
-                    {new Date(l.created_at).toLocaleDateString()}
+                    <div>{new Date(l.created_at).toLocaleDateString()}</div>
+                    <div className="text-[10px] opacity-70">mod {new Date(l.updated_at).toLocaleDateString()}</div>
                   </td>
                 </tr>
               ))}
@@ -278,7 +282,8 @@ function PriorityPill({ priority }: { priority: string | null }) {
 function NewLeadDialog({ onCreated }: { onCreated: () => void }) {
   const [form, setForm] = useState({
     company_name: "",
-    contact_name: "",
+    first_name: "",
+    last_name: "",
     email: "",
     phone: "",
     source: "website",
@@ -292,7 +297,8 @@ function NewLeadDialog({ onCreated }: { onCreated: () => void }) {
       const { error } = await supabase.from("leads").insert({
         lead_id: "",
         company_name: form.company_name,
-        contact_name: form.contact_name,
+        first_name: form.first_name,
+        last_name: form.last_name || null,
         email: form.email,
         phone: form.phone || null,
         source: form.source,
@@ -312,8 +318,8 @@ function NewLeadDialog({ onCreated }: { onCreated: () => void }) {
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.company_name || !form.contact_name || !form.email) {
-      toast.error("Company, contact, and email are required");
+    if (!form.company_name || !form.first_name || !form.email) {
+      toast.error("Company, first name, and email are required");
       return;
     }
     mutation.mutate();
@@ -327,7 +333,9 @@ function NewLeadDialog({ onCreated }: { onCreated: () => void }) {
       <form onSubmit={submit} className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <Field label="Company *" value={form.company_name} onChange={(v) => setForm({ ...form, company_name: v })} />
-          <Field label="Contact *" value={form.contact_name} onChange={(v) => setForm({ ...form, contact_name: v })} />
+          <div />
+          <Field label="First name *" value={form.first_name} onChange={(v) => setForm({ ...form, first_name: v })} />
+          <Field label="Last name" value={form.last_name} onChange={(v) => setForm({ ...form, last_name: v })} />
           <Field label="Email *" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
           <Field label="Phone" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
           <Field label="Vertical" value={form.vertical} onChange={(v) => setForm({ ...form, vertical: v })} />
