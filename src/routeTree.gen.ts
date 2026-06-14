@@ -120,9 +120,9 @@ const AdminLeadsIndexRoute = AdminLeadsIndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLeadsLeadIdRoute = AdminLeadsLeadIdRouteImport.update({
-  id: '/$leadId',
-  path: '/$leadId',
-  getParentRoute: () => AdminLeadsRoute,
+  id: '/admin/leads/$leadId',
+  path: '/admin/leads/$leadId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -273,6 +273,7 @@ export interface RootRouteChildren {
   ClientDocumentsRoute: typeof ClientDocumentsRoute
   ClientLoginRoute: typeof ClientLoginRoute
   ClientSupportRoute: typeof ClientSupportRoute
+  AdminLeadsLeadIdRoute: typeof AdminLeadsLeadIdRoute
   AdminLeadsIndexRoute: typeof AdminLeadsIndexRoute
 }
 
@@ -406,10 +407,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/leads/$leadId': {
       id: '/admin/leads/$leadId'
-      path: '/$leadId'
+      path: '/admin/leads/$leadId'
       fullPath: '/admin/leads/$leadId'
       preLoaderRoute: typeof AdminLeadsLeadIdRouteImport
-      parentRoute: typeof AdminLeadsRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -432,18 +433,9 @@ const rootRouteChildren: RootRouteChildren = {
   ClientDocumentsRoute: ClientDocumentsRoute,
   ClientLoginRoute: ClientLoginRoute,
   ClientSupportRoute: ClientSupportRoute,
+  AdminLeadsLeadIdRoute: AdminLeadsLeadIdRoute,
   AdminLeadsIndexRoute: AdminLeadsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
