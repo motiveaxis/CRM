@@ -75,13 +75,13 @@ function LeadsList() {
     queryFn: async () => {
       let q = supabase
         .from("leads")
-        .select("id, lead_id, company_name, contact_name, email, phone, source, vertical, priority, status, created_at", { count: "exact" });
+        .select("id, lead_id, company_name, first_name, last_name, contact_name, email, phone, source, vertical, priority, status, created_at, updated_at", { count: "exact" });
 
       if (statusFilter !== "all") q = q.eq("status", statusFilter);
       if (priorityFilter !== "all") q = q.eq("priority", priorityFilter);
       if (search.trim()) {
         const s = `%${search.trim()}%`;
-        q = q.or(`company_name.ilike.${s},contact_name.ilike.${s},email.ilike.${s},lead_id.ilike.${s}`);
+        q = q.or(`company_name.ilike.${s},first_name.ilike.${s},last_name.ilike.${s},email.ilike.${s},lead_id.ilike.${s}`);
       }
       q = q.order(sortBy, { ascending: sortDir === "asc" });
       q = q.range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
