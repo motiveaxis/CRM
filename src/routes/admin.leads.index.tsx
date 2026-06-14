@@ -209,14 +209,15 @@ function LeadsList() {
                     </Link>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="text-white">{l.contact_name}</div>
+                    <div className="text-white">{[l.first_name, l.last_name].filter(Boolean).join(" ")}</div>
                     <div className="text-[11px] text-[color:var(--text-secondary)]">{l.email}</div>
                   </td>
                   <td className="px-4 py-3 text-[color:var(--text-secondary)]">{l.source ?? "—"}</td>
                   <td className="px-4 py-3"><PriorityPill priority={l.priority} /></td>
                   <td className="px-4 py-3"><StatusPill status={l.status} /></td>
                   <td className="px-4 py-3 font-mono text-[11px] text-[color:var(--text-secondary)]">
-                    {new Date(l.created_at).toLocaleDateString()}
+                    <div>{new Date(l.created_at).toLocaleDateString()}</div>
+                    <div className="text-[10px] opacity-70">mod {new Date(l.updated_at).toLocaleDateString()}</div>
                   </td>
                 </tr>
               ))}
