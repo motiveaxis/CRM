@@ -282,7 +282,8 @@ function PriorityPill({ priority }: { priority: string | null }) {
 function NewLeadDialog({ onCreated }: { onCreated: () => void }) {
   const [form, setForm] = useState({
     company_name: "",
-    contact_name: "",
+    first_name: "",
+    last_name: "",
     email: "",
     phone: "",
     source: "website",
@@ -296,7 +297,8 @@ function NewLeadDialog({ onCreated }: { onCreated: () => void }) {
       const { error } = await supabase.from("leads").insert({
         lead_id: "",
         company_name: form.company_name,
-        contact_name: form.contact_name,
+        first_name: form.first_name,
+        last_name: form.last_name || null,
         email: form.email,
         phone: form.phone || null,
         source: form.source,
@@ -316,8 +318,8 @@ function NewLeadDialog({ onCreated }: { onCreated: () => void }) {
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.company_name || !form.contact_name || !form.email) {
-      toast.error("Company, contact, and email are required");
+    if (!form.company_name || !form.first_name || !form.email) {
+      toast.error("Company, first name, and email are required");
       return;
     }
     mutation.mutate();
@@ -331,7 +333,9 @@ function NewLeadDialog({ onCreated }: { onCreated: () => void }) {
       <form onSubmit={submit} className="space-y-3">
         <div className="grid grid-cols-2 gap-3">
           <Field label="Company *" value={form.company_name} onChange={(v) => setForm({ ...form, company_name: v })} />
-          <Field label="Contact *" value={form.contact_name} onChange={(v) => setForm({ ...form, contact_name: v })} />
+          <div />
+          <Field label="First name *" value={form.first_name} onChange={(v) => setForm({ ...form, first_name: v })} />
+          <Field label="Last name" value={form.last_name} onChange={(v) => setForm({ ...form, last_name: v })} />
           <Field label="Email *" type="email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
           <Field label="Phone" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
           <Field label="Vertical" value={form.vertical} onChange={(v) => setForm({ ...form, vertical: v })} />
