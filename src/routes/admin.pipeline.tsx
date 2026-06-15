@@ -15,6 +15,7 @@ import { AdminShell } from "@/components/admin-shell";
 import { StaffGuard } from "@/components/guards";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Kanban, List as ListIcon } from "lucide-react";
 
 export const Route = createFileRoute("/admin/pipeline")({
