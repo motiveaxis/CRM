@@ -434,7 +434,7 @@ function ReportDetail({ report, onClose }: { report: Report; onClose: () => void
                 </div>
                 <div className="text-[11px] text-[color:var(--text-secondary)] mt-1">
                   {q.agent_reviewed ?? "—"} · {q.source ?? "manual"} ·{" "}
-                  {new Date(q.reviewed_at ?? q.created_at).toLocaleString()}
+                  {new Date(q.reviewed_at ?? q.created_at ?? Date.now()).toLocaleString()}
                 </div>
                 {q.notes && <div className="text-[11px] text-white mt-1">{q.notes}</div>}
                 {Array.isArray(q.issues_found) && q.issues_found.length > 0 && (
