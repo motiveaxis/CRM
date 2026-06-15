@@ -307,7 +307,7 @@ function ReportDetail({ report, onClose }: { report: Report; onClose: () => void
       <div>
         <div className="ma-label">Company</div>
         <div className="text-white text-sm mt-1">
-          {report.lead?.lead_id ? (
+          {report.lead_id ? (
             <Link
               to="/admin/leads/$leadId"
               params={{ leadId: report.lead_id! }}
