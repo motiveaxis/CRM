@@ -271,7 +271,7 @@ function ReportDetail({ report, onClose }: { report: Report; onClose: () => void
       if (rErr) throw rErr;
       const { error: qErr } = await supabase.from("qc_records").insert({
         report_id: report.id,
-        lead_id: report.lead_id,
+        lead_id: report.lead_id ?? undefined,
         agent_reviewed: "report-axis",
         qc_status: status,
         source: "manual",
