@@ -46,7 +46,7 @@ interface Report {
 
 interface QcRecord {
   id: string;
-  qc_id: string;
+  qc_id: string | null;
   agent_reviewed: string | null;
   report_id: string | null;
   qc_status: string;
@@ -54,7 +54,8 @@ interface QcRecord {
   corrections_applied: any;
   notes: string | null;
   reviewed_at: string | null;
-  created_at: string;
+  created_at: string | null;
+  source: string | null;
 }
 
 const STATUS_FILTERS = ["all", "draft", "qc_pending", "qc_approved", "sent", "viewed"] as const;
