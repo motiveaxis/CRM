@@ -157,18 +157,20 @@ function Pipeline() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            size="sm"
+            variant={view === "kanban" ? "default" : "outline"}
             onClick={() => setView("kanban")}
-            className={`ma-btn ${view === "kanban" ? "ma-btn-primary" : ""}`}
           >
             <Kanban size={14} /> Kanban
-          </button>
-          <button
+          </Button>
+          <Button
+            size="sm"
+            variant={view === "list" ? "default" : "outline"}
             onClick={() => setView("list")}
-            className={`ma-btn ${view === "list" ? "ma-btn-primary" : ""}`}
           >
             <ListIcon size={14} /> List
-          </button>
+          </Button>
         </div>
       </div>
 
