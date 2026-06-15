@@ -270,9 +270,10 @@ function ReportDetail({ report, onClose }: { report: Report; onClose: () => void
         })
         .eq("id", report.id);
       if (rErr) throw rErr;
+      if (!report.lead_id) throw new Error("Report has no linked lead");
       const { error: qErr } = await supabase.from("qc_records").insert({
         report_id: report.id,
-        lead_id: report.lead_id ?? undefined,
+        lead_id: report.lead_id,
         agent_reviewed: "report-axis",
         qc_status: status,
         source: "manual",
