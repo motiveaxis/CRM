@@ -32,6 +32,24 @@ function Dashboard() {
     },
   });
 
+  const { data: automations = [] } = useQuery({
+    queryKey: ["client-automations", client?.id],
+    enabled: !!client,
+    queryFn: async () => {
+      const { data } = await supabase.from("automations").select("*").eq("client_id", client!.id);
+      return data ?? [];
+    },
+  });
+
+  const { data: apis = [] } = useQuery({
+    queryKey: ["client-apis", client?.client_id],
+    enabled: !!client,
+    queryFn: async () => {
+      const { data } = await supabase.from("api_connections").select("*").eq("client_id", client!.client_id);
+      return data ?? [];
+    },
+  });
+
   if (!client) {
     return (
       <div className="ma-panel p-8">
@@ -45,10 +63,14 @@ function Dashboard() {
     );
   }
 
+  const activeCount = automations.filter((a) => a.status === "active").length;
+  const totalHours = automations.reduce((s, a) => s + (a.monthly_time_saved_hours ?? 0), 0);
+  const totalApiCost = apis.reduce((s, a) => s + (a.monthly_cost ?? 0), 0);
+
   const cards = [
-    { label: "Active automations", value: "—", sub: "Built in next turn" },
-    { label: "Hours saved / mo", value: "—", sub: "Aggregated" },
-    { label: "API cost / mo", value: "—", sub: "Current period" },
+    { label: "Active automations", value: String(activeCount), sub: `${automations.length} total` },
+    { label: "Hours saved / mo", value: totalHours.toFixed(1), sub: "Aggregated" },
+    { label: "API cost / mo", value: `$${totalApiCost.toFixed(2)}`, sub: "Current period" },
     { label: "Onboarding step", value: client.onboarding_step, sub: client.status },
   ];
 
