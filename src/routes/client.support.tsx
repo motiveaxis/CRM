@@ -5,6 +5,7 @@ import { ClientShell } from "@/components/client-shell";
 import { ClientGuard } from "@/components/guards";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
+import { useRealtimeInvalidate } from "@/hooks/use-realtime-invalidate";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/client/support")({
@@ -54,6 +55,15 @@ function Page() {
       return data ?? [];
     },
   });
+
+  useRealtimeInvalidate("client-tickets-rt", [
+    {
+      table: "support_tickets",
+      filter: client ? `client_id=eq.${client.id}` : undefined,
+      queryKeys: [["client-tickets", client?.id]],
+    },
+  ]);
+
 
   const create = useMutation({
     mutationFn: async () => {

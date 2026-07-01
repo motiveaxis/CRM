@@ -4,6 +4,7 @@ import { ClientShell } from "@/components/client-shell";
 import { ClientGuard } from "@/components/guards";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
+import { useRealtimeInvalidate } from "@/hooks/use-realtime-invalidate";
 import { BarChart3, DollarSign, Plug, AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/client/api-usage")({
@@ -59,6 +60,14 @@ function Page() {
       return data ?? [];
     },
   });
+
+  useRealtimeInvalidate("client-api-usage-rt", [
+    {
+      table: "api_connections",
+      queryKeys: [["client-apis", client?.client_id]],
+    },
+  ]);
+
 
   if (!client) {
     return <div className="ma-panel p-6 ma-label">No client record linked.</div>;

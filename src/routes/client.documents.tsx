@@ -4,6 +4,7 @@ import { ClientShell } from "@/components/client-shell";
 import { ClientGuard } from "@/components/guards";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
+import { useRealtimeInvalidate } from "@/hooks/use-realtime-invalidate";
 import { FileText, ExternalLink, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/client/documents")({
@@ -75,6 +76,23 @@ function Page() {
       return data;
     },
   });
+
+  useRealtimeInvalidate("client-docs-rt", [
+    {
+      table: "reports",
+      queryKeys: [["client-report", client?.report_id ?? undefined]],
+    },
+    {
+      table: "deals",
+      queryKeys: [["client-deal", client?.deal_id]],
+    },
+    {
+      table: "credentials_vault",
+      filter: client ? `client_id=eq.${client.id}` : undefined,
+      queryKeys: [["client-creds", client?.id]],
+    },
+  ]);
+
 
   if (!client) return <div className="ma-panel p-6 ma-label">No client record linked.</div>;
 
