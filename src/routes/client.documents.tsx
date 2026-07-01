@@ -4,6 +4,7 @@ import { ClientShell } from "@/components/client-shell";
 import { ClientGuard } from "@/components/guards";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
+import { useRealtimeInvalidate } from "@/hooks/use-realtime-invalidate";
 import { FileText, ExternalLink, Shield } from "lucide-react";
 
 export const Route = createFileRoute("/client/documents")({
