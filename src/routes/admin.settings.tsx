@@ -26,6 +26,7 @@ interface AppSettings {
   webhook_create_portal_user: string | null;
   webhook_notify_credentials: string | null;
   webhook_lead_normalize: string | null;
+  webhook_ticket_updated: string | null;
   hourly_rate_for_savings: number | null;
   updated_at: string;
 }
@@ -208,6 +209,7 @@ function WebhooksTab() {
           webhook_create_portal_user: form.webhook_create_portal_user ?? null,
           webhook_notify_credentials: form.webhook_notify_credentials ?? null,
           webhook_lead_normalize: form.webhook_lead_normalize ?? null,
+          webhook_ticket_updated: form.webhook_ticket_updated ?? null,
         });
         if (error) throw error;
         return;
@@ -219,6 +221,7 @@ function WebhooksTab() {
           webhook_create_portal_user: form.webhook_create_portal_user ?? null,
           webhook_notify_credentials: form.webhook_notify_credentials ?? null,
           webhook_lead_normalize: form.webhook_lead_normalize ?? null,
+          webhook_ticket_updated: form.webhook_ticket_updated ?? null,
         })
         .eq("id", data.id);
       if (error) throw error;
@@ -237,6 +240,7 @@ function WebhooksTab() {
     { key: "webhook_provision_instance", label: "Provision n8n instance", help: "Fires from Portals → Provision" },
     { key: "webhook_create_portal_user", label: "Create portal user", help: "Fires from Portals → Mark live" },
     { key: "webhook_notify_credentials", label: "Credentials submitted", help: "Notify ops when client submits creds" },
+    { key: "webhook_ticket_updated", label: "Ticket created / status change", help: "Fires from a DB trigger; n8n sends notification emails" },
   ];
 
   return (

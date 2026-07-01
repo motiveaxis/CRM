@@ -80,6 +80,7 @@ export type Database = {
           webhook_lead_normalize: string | null
           webhook_notify_credentials: string | null
           webhook_provision_instance: string | null
+          webhook_ticket_updated: string | null
         }
         Insert: {
           agency_email?: string | null
@@ -92,6 +93,7 @@ export type Database = {
           webhook_lead_normalize?: string | null
           webhook_notify_credentials?: string | null
           webhook_provision_instance?: string | null
+          webhook_ticket_updated?: string | null
         }
         Update: {
           agency_email?: string | null
@@ -104,6 +106,7 @@ export type Database = {
           webhook_lead_normalize?: string | null
           webhook_notify_credentials?: string | null
           webhook_provision_instance?: string | null
+          webhook_ticket_updated?: string | null
         }
         Relationships: []
       }
@@ -930,6 +933,47 @@ export type Database = {
             columns: ["lead_id"]
             isOneToOne: false
             referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      support_ticket_attachments: {
+        Row: {
+          content_type: string | null
+          created_at: string
+          file_name: string
+          file_size: number | null
+          id: string
+          storage_path: string
+          ticket_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          content_type?: string | null
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          id?: string
+          storage_path: string
+          ticket_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          content_type?: string | null
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          id?: string
+          storage_path?: string
+          ticket_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_attachments_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
             referencedColumns: ["id"]
           },
         ]
