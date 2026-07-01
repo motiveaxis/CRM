@@ -803,6 +803,30 @@ export type Database = {
           },
         ]
       }
+      report_events: {
+        Row: {
+          created_at: string | null
+          event_tracking: Json | null
+          id: string
+          lead_id: string
+          report_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_tracking?: Json | null
+          id?: string
+          lead_id: string
+          report_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_tracking?: Json | null
+          id?: string
+          lead_id?: string
+          report_id?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           build_approach: string | null
@@ -810,6 +834,7 @@ export type Database = {
           created_at: string
           current_state_description: string | null
           current_state_json: Json | null
+          data: Json | null
           diagnosis_summary: string | null
           future_state_description: string | null
           future_state_json: Json | null
@@ -841,6 +866,7 @@ export type Database = {
           created_at?: string
           current_state_description?: string | null
           current_state_json?: Json | null
+          data?: Json | null
           diagnosis_summary?: string | null
           future_state_description?: string | null
           future_state_json?: Json | null
@@ -872,6 +898,7 @@ export type Database = {
           created_at?: string
           current_state_description?: string | null
           current_state_json?: Json | null
+          data?: Json | null
           diagnosis_summary?: string | null
           future_state_description?: string | null
           future_state_json?: Json | null

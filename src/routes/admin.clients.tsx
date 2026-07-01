@@ -1,11 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Circle, ExternalLink, Search } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { CheckCircle2, Circle, ExternalLink, Search, Mail, KeyRound } from "lucide-react";
 import { AdminShell } from "@/components/admin-shell";
 import { StaffGuard } from "@/components/guards";
 import { supabase } from "@/integrations/supabase/client";
+import { invitePortalUser, submitClientCredentials } from "@/lib/onboarding.functions";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/admin/clients")({
   head: () => ({ meta: [{ title: "Clients — MotiveAxis" }] }),
@@ -52,6 +55,7 @@ function fmtMoney(n: number | null) {
 }
 
 function ClientsPage() {
+  const qc = useQueryClient();
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -67,6 +71,27 @@ function ClientsPage() {
       return (data ?? []) as ClientRow[];
     },
   });
+
+  // Realtime: reflect provisioning + portal handoff instantly.
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-clients-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "clients" },
+        () => qc.invalidateQueries({ queryKey: ["clients"] }),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "credentials_vault" },
+        () => qc.invalidateQueries({ queryKey: ["clients"] }),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [qc]);
+
 
   const filtered = useMemo(() => {
     return clients.filter((c) => {
@@ -295,6 +320,8 @@ function ClientDetail({ client }: { client: ClientRow }) {
         </div>
       )}
 
+      <OnboardingActions client={client} />
+
       <div className="ma-panel p-5">
         <div className="text-sm font-semibold text-white mb-3">Change status</div>
         <div className="flex flex-wrap gap-2">
@@ -313,6 +340,113 @@ function ClientDetail({ client }: { client: ClientRow }) {
     </div>
   );
 }
+
+function OnboardingActions({ client }: { client: ClientRow }) {
+  const qc = useQueryClient();
+  const invite = useServerFn(invitePortalUser);
+  const submitCreds = useServerFn(submitClientCredentials);
+  const [credsPayload, setCredsPayload] = useState("");
+  const [credsRef, setCredsRef] = useState("");
+
+  const inviteMutation = useMutation({
+    mutationFn: async () =>
+      invite({
+        data: {
+          clientId: client.id,
+          redirectTo: `${window.location.origin}/client/login`,
+        },
+      }),
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: ["clients"] });
+      toast.success(res.invited ? "Invite email sent" : "Existing user linked to portal");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const credsMutation = useMutation({
+    mutationFn: async () =>
+      submitCreds({
+        data: {
+          clientId: client.id,
+          payload: credsPayload.trim(),
+          keyRef: credsRef.trim() || undefined,
+        },
+      }),
+    onSuccess: () => {
+      setCredsPayload("");
+      setCredsRef("");
+      qc.invalidateQueries({ queryKey: ["clients"] });
+      toast.success("Credentials stored · provisioning triggered");
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div className="ma-panel p-5 space-y-4">
+      <div className="text-sm font-semibold text-white flex items-center gap-2">
+        <Mail size={14} /> Portal invite
+      </div>
+      {client.portal_user_id ? (
+        <div className="text-xs text-[color:var(--text-secondary)]">
+          Portal user linked ·{" "}
+          <span className="font-mono text-white">{client.portal_user_id.slice(0, 8)}…</span>
+          {client.portal_created_at && ` · ${client.portal_created_at.slice(0, 10)}`}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          <div className="text-xs text-[color:var(--text-secondary)]">
+            Sends a magic-link invite to {client.email}. On acceptance the user is bound to this client record.
+          </div>
+          <button
+            onClick={() => inviteMutation.mutate()}
+            disabled={inviteMutation.isPending}
+            className="ma-btn text-xs disabled:opacity-40"
+          >
+            {inviteMutation.isPending ? "Sending…" : "Invite portal user"}
+          </button>
+        </div>
+      )}
+
+      <div className="border-t border-[color:var(--border)] pt-4">
+        <div className="text-sm font-semibold text-white flex items-center gap-2 mb-2">
+          <KeyRound size={14} /> Credentials handoff
+        </div>
+        {client.credentials_submitted ? (
+          <div className="text-xs text-[color:var(--text-secondary)]">
+            Credentials submitted · awaiting {client.n8n_provisioned ? "activation" : "provisioning"}.
+            {client.n8n_provisioned_at && ` Provisioned ${client.n8n_provisioned_at.slice(0, 10)}.`}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <textarea
+              value={credsPayload}
+              onChange={(e) => setCredsPayload(e.target.value)}
+              placeholder="Encrypted payload / opaque blob…"
+              className="w-full bg-[color:var(--surface)] border border-[color:var(--border)] rounded-md px-2 py-1.5 text-xs font-mono min-h-[80px]"
+            />
+            <input
+              value={credsRef}
+              onChange={(e) => setCredsRef(e.target.value)}
+              placeholder="Encryption key ref (optional)"
+              className="w-full bg-[color:var(--surface)] border border-[color:var(--border)] rounded-md px-2 py-1.5 text-xs"
+            />
+            <button
+              onClick={() => credsMutation.mutate()}
+              disabled={credsMutation.isPending || !credsPayload.trim()}
+              className="ma-btn text-xs disabled:opacity-40"
+            >
+              {credsMutation.isPending ? "Submitting…" : "Store & trigger provisioning"}
+            </button>
+            <div className="text-[10px] text-[color:var(--text-secondary)]">
+              Fires the configured n8n provisioning webhook after storage.
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 
 function StatusBadge({ status }: { status: string }) {
   const color =
