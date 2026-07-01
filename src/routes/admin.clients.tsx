@@ -55,6 +55,7 @@ function fmtMoney(n: number | null) {
 }
 
 function ClientsPage() {
+  const qc = useQueryClient();
   const [filter, setFilter] = useState<StatusFilter>("all");
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -70,6 +71,27 @@ function ClientsPage() {
       return (data ?? []) as ClientRow[];
     },
   });
+
+  // Realtime: reflect provisioning + portal handoff instantly.
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-clients-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "clients" },
+        () => qc.invalidateQueries({ queryKey: ["clients"] }),
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "credentials_vault" },
+        () => qc.invalidateQueries({ queryKey: ["clients"] }),
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [qc]);
+
 
   const filtered = useMemo(() => {
     return clients.filter((c) => {
