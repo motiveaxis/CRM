@@ -21,8 +21,7 @@ export function useRealtimeInvalidate(channelName: string, subs: Sub[]) {
     const channel = supabase.channel(channelName);
     for (const s of subs) {
       channel.on(
-        "postgres_changes",
-        // @ts-expect-error supabase-js typing for postgres_changes filter is loose
+        "postgres_changes" as never,
         { event: "*", schema: "public", table: s.table, filter: s.filter },
         () => {
           for (const key of s.queryKeys) {
