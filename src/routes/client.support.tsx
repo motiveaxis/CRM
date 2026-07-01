@@ -56,6 +56,15 @@ function Page() {
     },
   });
 
+  useRealtimeInvalidate("client-tickets-rt", [
+    {
+      table: "support_tickets",
+      filter: client ? `client_id=eq.${client.id}` : undefined,
+      queryKeys: [["client-tickets", client?.id]],
+    },
+  ]);
+
+
   const create = useMutation({
     mutationFn: async () => {
       if (!subject.trim()) throw new Error("Subject required");
