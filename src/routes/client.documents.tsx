@@ -77,6 +77,23 @@ function Page() {
     },
   });
 
+  useRealtimeInvalidate("client-docs-rt", [
+    {
+      table: "reports",
+      queryKeys: [["client-report", client?.report_id ?? undefined]],
+    },
+    {
+      table: "deals",
+      queryKeys: [["client-deal", client?.deal_id]],
+    },
+    {
+      table: "credentials_vault",
+      filter: client ? `client_id=eq.${client.id}` : undefined,
+      queryKeys: [["client-creds", client?.id]],
+    },
+  ]);
+
+
   if (!client) return <div className="ma-panel p-6 ma-label">No client record linked.</div>;
 
   type Doc = { title: string; sub: string; url: string | null; meta: string; icon: typeof FileText };
