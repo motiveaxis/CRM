@@ -61,6 +61,14 @@ function Page() {
     },
   });
 
+  useRealtimeInvalidate("client-api-usage-rt", [
+    {
+      table: "api_connections",
+      queryKeys: [["client-apis", client?.client_id]],
+    },
+  ]);
+
+
   if (!client) {
     return <div className="ma-panel p-6 ma-label">No client record linked.</div>;
   }
