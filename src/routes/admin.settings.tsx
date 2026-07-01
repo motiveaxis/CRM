@@ -26,6 +26,7 @@ interface AppSettings {
   webhook_create_portal_user: string | null;
   webhook_notify_credentials: string | null;
   webhook_lead_normalize: string | null;
+  webhook_ticket_updated: string | null;
   hourly_rate_for_savings: number | null;
   updated_at: string;
 }
