@@ -66,6 +66,15 @@ function Page() {
     },
   });
 
+  useRealtimeInvalidate("client-automations-rt", [
+    {
+      table: "automations",
+      filter: client ? `client_id=eq.${client.id}` : undefined,
+      queryKeys: [["client-automations", client?.id]],
+    },
+  ]);
+
+
   if (!client) {
     return <div className="ma-panel p-6 ma-label">No client record linked.</div>;
   }
