@@ -5,6 +5,7 @@ import { ClientShell } from "@/components/client-shell";
 import { ClientGuard } from "@/components/guards";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@/hooks/use-session";
+import { useRealtimeInvalidate } from "@/hooks/use-realtime-invalidate";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/client/support")({
