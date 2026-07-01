@@ -1,11 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { CheckCircle2, Circle, ExternalLink, Search } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { CheckCircle2, Circle, ExternalLink, Search, Mail, KeyRound } from "lucide-react";
 import { AdminShell } from "@/components/admin-shell";
 import { StaffGuard } from "@/components/guards";
 import { supabase } from "@/integrations/supabase/client";
+import { invitePortalUser, submitClientCredentials } from "@/lib/onboarding.functions";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/admin/clients")({
   head: () => ({ meta: [{ title: "Clients — MotiveAxis" }] }),
