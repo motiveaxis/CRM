@@ -148,25 +148,7 @@ function Page() {
           ) : (
             <div className="divide-y divide-[color:var(--border)]">
               {tickets.map((t) => (
-                <div key={t.id} className="px-5 py-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="font-medium text-sm">{t.subject}</div>
-                      <div className="text-[11px] font-mono text-[color:var(--text-muted)] mt-0.5">{t.ticket_id}</div>
-                      {t.description && <p className="text-xs text-[color:var(--text-secondary)] mt-2">{t.description}</p>}
-                    </div>
-                    <div className="flex flex-col items-end gap-1 shrink-0">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-[3px] uppercase ${
-                        t.status === "open" ? "bg-amber-500/15 text-amber-300" :
-                        t.status === "in_progress" ? "bg-blue-500/15 text-blue-300" :
-                        t.status === "resolved" || t.status === "closed" ? "bg-emerald-500/15 text-emerald-300" :
-                        "bg-[color:var(--surface-2)] text-[color:var(--text-secondary)]"
-                      }`}>{t.status}</span>
-                      <span className="text-[10px] text-[color:var(--text-muted)] uppercase">{t.priority}</span>
-                    </div>
-                  </div>
-                  <div className="text-[11px] text-[color:var(--text-muted)] mt-2">Opened {fmt(t.created_at)}</div>
-                </div>
+                <TicketRow key={t.id} ticket={t} clientId={client!.id} />
               ))}
             </div>
           )}
@@ -175,3 +157,130 @@ function Page() {
     </div>
   );
 }
+
+interface TicketRowProps {
+  ticket: {
+    id: string;
+    ticket_id: string;
+    subject: string;
+    description: string | null;
+    status: string;
+    priority: string;
+    created_at: string;
+  };
+  clientId: string;
+}
+
+function TicketRow({ ticket, clientId }: TicketRowProps) {
+  const qc = useQueryClient();
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const { data: attachments = [] } = useQuery({
+    queryKey: ["ticket-attachments", ticket.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("support_ticket_attachments")
+        .select("*")
+        .eq("ticket_id", ticket.id)
+        .order("created_at", { ascending: false });
+      return data ?? [];
+    },
+  });
+
+  const handleUpload = async (file: File) => {
+    if (file.size > 25 * 1024 * 1024) {
+      toast.error("File exceeds 25 MB");
+      return;
+    }
+    setUploading(true);
+    try {
+      const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+      const path = `${clientId}/${ticket.id}/${Date.now()}-${safeName}`;
+      const { error: upErr } = await supabase.storage
+        .from("ticket-attachments")
+        .upload(path, file, { contentType: file.type });
+      if (upErr) throw upErr;
+      const { error: insErr } = await supabase.from("support_ticket_attachments").insert({
+        ticket_id: ticket.id,
+        storage_path: path,
+        file_name: file.name,
+        file_size: file.size,
+        content_type: file.type,
+      });
+      if (insErr) throw insErr;
+      qc.invalidateQueries({ queryKey: ["ticket-attachments", ticket.id] });
+      toast.success("File attached");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  };
+
+  const openAttachment = async (path: string) => {
+    const { data, error } = await supabase.storage
+      .from("ticket-attachments")
+      .createSignedUrl(path, 300);
+    if (error) return toast.error(error.message);
+    window.open(data.signedUrl, "_blank");
+  };
+
+  return (
+    <div className="px-5 py-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="font-medium text-sm">{ticket.subject}</div>
+          <div className="text-[11px] font-mono text-[color:var(--text-muted)] mt-0.5">{ticket.ticket_id}</div>
+          {ticket.description && <p className="text-xs text-[color:var(--text-secondary)] mt-2">{ticket.description}</p>}
+        </div>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          <span className={`text-[10px] px-2 py-0.5 rounded-[3px] uppercase ${
+            ticket.status === "open" ? "bg-amber-500/15 text-amber-300" :
+            ticket.status === "in_progress" ? "bg-blue-500/15 text-blue-300" :
+            ticket.status === "resolved" || ticket.status === "closed" ? "bg-emerald-500/15 text-emerald-300" :
+            "bg-[color:var(--surface-2)] text-[color:var(--text-secondary)]"
+          }`}>{ticket.status}</span>
+          <span className="text-[10px] text-[color:var(--text-muted)] uppercase">{ticket.priority}</span>
+        </div>
+      </div>
+      <div className="text-[11px] text-[color:var(--text-muted)] mt-2">Opened {fmt(ticket.created_at)}</div>
+
+      {attachments.length > 0 && (
+        <ul className="mt-3 space-y-1">
+          {attachments.map((a) => (
+            <li key={a.id}>
+              <button
+                onClick={() => openAttachment(a.storage_path)}
+                className="inline-flex items-center gap-1.5 text-[11px] text-[color:var(--text-secondary)] hover:text-white"
+              >
+                <Paperclip size={11} />
+                <span>{a.file_name}</span>
+                {a.file_size && <span className="text-[color:var(--text-muted)]">· {(a.file_size / 1024).toFixed(0)} KB</span>}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="mt-3">
+        <input
+          ref={fileRef}
+          type="file"
+          className="hidden"
+          onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
+        />
+        <button
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          className="inline-flex items-center gap-1.5 text-[11px] text-[color:var(--text-secondary)] hover:text-white disabled:opacity-40"
+        >
+          {uploading ? <X size={11} /> : <Upload size={11} />}
+          {uploading ? "Uploading…" : "Attach file"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
