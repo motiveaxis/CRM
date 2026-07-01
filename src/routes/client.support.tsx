@@ -63,7 +63,12 @@ function Page() {
       filter: client ? `client_id=eq.${client.id}` : undefined,
       queryKeys: [["client-tickets", client?.id]],
     },
+    {
+      table: "support_ticket_attachments",
+      queryKeys: [["ticket-attachments"]],
+    },
   ]);
+
 
 
   const create = useMutation({
