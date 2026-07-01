@@ -240,6 +240,7 @@ function WebhooksTab() {
     { key: "webhook_provision_instance", label: "Provision n8n instance", help: "Fires from Portals → Provision" },
     { key: "webhook_create_portal_user", label: "Create portal user", help: "Fires from Portals → Mark live" },
     { key: "webhook_notify_credentials", label: "Credentials submitted", help: "Notify ops when client submits creds" },
+    { key: "webhook_ticket_updated", label: "Ticket created / status change", help: "Fires from a DB trigger; n8n sends notification emails" },
   ];
 
   return (
