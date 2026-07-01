@@ -221,6 +221,7 @@ function WebhooksTab() {
           webhook_create_portal_user: form.webhook_create_portal_user ?? null,
           webhook_notify_credentials: form.webhook_notify_credentials ?? null,
           webhook_lead_normalize: form.webhook_lead_normalize ?? null,
+          webhook_ticket_updated: form.webhook_ticket_updated ?? null,
         })
         .eq("id", data.id);
       if (error) throw error;
