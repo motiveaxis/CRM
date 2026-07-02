@@ -170,6 +170,7 @@ function Reports() {
                 <th className="px-3 py-2 font-medium">Status</th>
                 <th className="px-3 py-2 font-medium">Value</th>
                 <th className="px-3 py-2 font-medium">Updated</th>
+                <th className="px-3 py-2 font-medium"></th>
               </tr>
             </thead>
             <tbody>
