@@ -170,6 +170,7 @@ function Reports() {
                 <th className="px-3 py-2 font-medium">Status</th>
                 <th className="px-3 py-2 font-medium">Value</th>
                 <th className="px-3 py-2 font-medium">Updated</th>
+                <th className="px-3 py-2 font-medium"></th>
               </tr>
             </thead>
             <tbody>
@@ -208,12 +209,22 @@ function Reports() {
                     <td className="px-3 py-2 text-xs text-[color:var(--text-secondary)]">
                       {new Date(r.updated_at).toLocaleDateString()}
                     </td>
+                    <td className="px-3 py-2 text-xs">
+                      <Link
+                        to="/admin/reports/$reportId"
+                        params={{ reportId: r.id }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[color:var(--accent-red)] hover:underline"
+                      >
+                        Edit
+                      </Link>
+                    </td>
                   </tr>
                 );
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-8 text-center text-[color:var(--text-secondary)]">
+                  <td colSpan={7} className="px-3 py-8 text-center text-[color:var(--text-secondary)]">
                     {reportsQ.isLoading ? "Loading…" : "No reports match."}
                   </td>
                 </tr>
