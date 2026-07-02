@@ -224,7 +224,7 @@ function Reports() {
               })}
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-8 text-center text-[color:var(--text-secondary)]">
+                  <td colSpan={7} className="px-3 py-8 text-center text-[color:var(--text-secondary)]">
                     {reportsQ.isLoading ? "Loading…" : "No reports match."}
                   </td>
                 </tr>
