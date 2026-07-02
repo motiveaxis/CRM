@@ -209,6 +209,16 @@ function Reports() {
                     <td className="px-3 py-2 text-xs text-[color:var(--text-secondary)]">
                       {new Date(r.updated_at).toLocaleDateString()}
                     </td>
+                    <td className="px-3 py-2 text-xs">
+                      <Link
+                        to="/admin/reports/$reportId"
+                        params={{ reportId: r.id }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-[color:var(--accent-red)] hover:underline"
+                      >
+                        Edit
+                      </Link>
+                    </td>
                   </tr>
                 );
               })}
