@@ -243,7 +243,7 @@ function ReportEditorPage() {
 
       {isLegacy ? (
         <div className="ma-panel p-6 text-sm text-[color:var(--text-secondary)]">
-          This report uses a legacy format and cannot be edited. Generate a new report to use the editor.
+          This report ({report.report_id}) uses a legacy format and cannot be edited in the section editor. It was generated before the advanced reporting system was deployed. To edit reports with the new section-based editor, generate a new report from a lead.
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4" style={{ minHeight: "70vh" }}>
