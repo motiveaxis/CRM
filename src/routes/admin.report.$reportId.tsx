@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { ArrowLeft, Save, CheckCircle2, Send, Plus, Trash2, X } from "lucide-react";
 import { generateReportHTML, type ReportData, type ReportSection, type LeadLite } from "@/lib/report-html";
 
-export const Route = createFileRoute("/admin/reports/$reportId")({
+export const Route = createFileRoute("/admin/report/$reportId")({
   head: () => ({ meta: [{ title: "Report Editor — MotiveAxis CRM" }] }),
   component: () => (
     <StaffGuard>

@@ -27,7 +27,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminClientsRouteImport } from './routes/admin.clients'
 import { Route as AdminLeadsIndexRouteImport } from './routes/admin.leads.index'
-import { Route as AdminReportsReportIdRouteImport } from './routes/admin.reports.$reportId'
+import { Route as AdminReportReportIdRouteImport } from './routes/admin.report.$reportId'
 import { Route as AdminLeadsLeadIdRouteImport } from './routes/admin.leads.$leadId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -120,10 +120,10 @@ const AdminLeadsIndexRoute = AdminLeadsIndexRouteImport.update({
   path: '/admin/leads/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminReportsReportIdRoute = AdminReportsReportIdRouteImport.update({
-  id: '/$reportId',
-  path: '/$reportId',
-  getParentRoute: () => AdminReportsRoute,
+const AdminReportReportIdRoute = AdminReportReportIdRouteImport.update({
+  id: '/admin/report/$reportId',
+  path: '/admin/report/$reportId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminLeadsLeadIdRoute = AdminLeadsLeadIdRouteImport.update({
   id: '/admin/leads/$leadId',
@@ -139,7 +139,7 @@ export interface FileRoutesByFullPath {
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/pipeline': typeof AdminPipelineRoute
   '/admin/portals': typeof AdminPortalsRoute
-  '/admin/reports': typeof AdminReportsRouteWithChildren
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/sales': typeof AdminSalesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -150,7 +150,7 @@ export interface FileRoutesByFullPath {
   '/client/login': typeof ClientLoginRoute
   '/client/support': typeof ClientSupportRoute
   '/admin/leads/$leadId': typeof AdminLeadsLeadIdRoute
-  '/admin/reports/$reportId': typeof AdminReportsReportIdRoute
+  '/admin/report/$reportId': typeof AdminReportReportIdRoute
   '/admin/leads/': typeof AdminLeadsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -161,7 +161,7 @@ export interface FileRoutesByTo {
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/pipeline': typeof AdminPipelineRoute
   '/admin/portals': typeof AdminPortalsRoute
-  '/admin/reports': typeof AdminReportsRouteWithChildren
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/sales': typeof AdminSalesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -172,7 +172,7 @@ export interface FileRoutesByTo {
   '/client/login': typeof ClientLoginRoute
   '/client/support': typeof ClientSupportRoute
   '/admin/leads/$leadId': typeof AdminLeadsLeadIdRoute
-  '/admin/reports/$reportId': typeof AdminReportsReportIdRoute
+  '/admin/report/$reportId': typeof AdminReportReportIdRoute
   '/admin/leads': typeof AdminLeadsIndexRoute
 }
 export interface FileRoutesById {
@@ -184,7 +184,7 @@ export interface FileRoutesById {
   '/admin/marketing': typeof AdminMarketingRoute
   '/admin/pipeline': typeof AdminPipelineRoute
   '/admin/portals': typeof AdminPortalsRoute
-  '/admin/reports': typeof AdminReportsRouteWithChildren
+  '/admin/reports': typeof AdminReportsRoute
   '/admin/sales': typeof AdminSalesRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/team': typeof AdminTeamRoute
@@ -195,7 +195,7 @@ export interface FileRoutesById {
   '/client/login': typeof ClientLoginRoute
   '/client/support': typeof ClientSupportRoute
   '/admin/leads/$leadId': typeof AdminLeadsLeadIdRoute
-  '/admin/reports/$reportId': typeof AdminReportsReportIdRoute
+  '/admin/report/$reportId': typeof AdminReportReportIdRoute
   '/admin/leads/': typeof AdminLeadsIndexRoute
 }
 export interface FileRouteTypes {
@@ -219,7 +219,7 @@ export interface FileRouteTypes {
     | '/client/login'
     | '/client/support'
     | '/admin/leads/$leadId'
-    | '/admin/reports/$reportId'
+    | '/admin/report/$reportId'
     | '/admin/leads/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -241,7 +241,7 @@ export interface FileRouteTypes {
     | '/client/login'
     | '/client/support'
     | '/admin/leads/$leadId'
-    | '/admin/reports/$reportId'
+    | '/admin/report/$reportId'
     | '/admin/leads'
   id:
     | '__root__'
@@ -263,7 +263,7 @@ export interface FileRouteTypes {
     | '/client/login'
     | '/client/support'
     | '/admin/leads/$leadId'
-    | '/admin/reports/$reportId'
+    | '/admin/report/$reportId'
     | '/admin/leads/'
   fileRoutesById: FileRoutesById
 }
@@ -275,7 +275,7 @@ export interface RootRouteChildren {
   AdminMarketingRoute: typeof AdminMarketingRoute
   AdminPipelineRoute: typeof AdminPipelineRoute
   AdminPortalsRoute: typeof AdminPortalsRoute
-  AdminReportsRoute: typeof AdminReportsRouteWithChildren
+  AdminReportsRoute: typeof AdminReportsRoute
   AdminSalesRoute: typeof AdminSalesRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminTeamRoute: typeof AdminTeamRoute
@@ -286,6 +286,7 @@ export interface RootRouteChildren {
   ClientLoginRoute: typeof ClientLoginRoute
   ClientSupportRoute: typeof ClientSupportRoute
   AdminLeadsLeadIdRoute: typeof AdminLeadsLeadIdRoute
+  AdminReportReportIdRoute: typeof AdminReportReportIdRoute
   AdminLeadsIndexRoute: typeof AdminLeadsIndexRoute
 }
 
@@ -417,12 +418,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLeadsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/reports/$reportId': {
-      id: '/admin/reports/$reportId'
-      path: '/$reportId'
-      fullPath: '/admin/reports/$reportId'
-      preLoaderRoute: typeof AdminReportsReportIdRouteImport
-      parentRoute: typeof AdminReportsRoute
+    '/admin/report/$reportId': {
+      id: '/admin/report/$reportId'
+      path: '/admin/report/$reportId'
+      fullPath: '/admin/report/$reportId'
+      preLoaderRoute: typeof AdminReportReportIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/leads/$leadId': {
       id: '/admin/leads/$leadId'
@@ -434,18 +435,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AdminReportsRouteChildren {
-  AdminReportsReportIdRoute: typeof AdminReportsReportIdRoute
-}
-
-const AdminReportsRouteChildren: AdminReportsRouteChildren = {
-  AdminReportsReportIdRoute: AdminReportsReportIdRoute,
-}
-
-const AdminReportsRouteWithChildren = AdminReportsRoute._addFileChildren(
-  AdminReportsRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminClientsRoute: AdminClientsRoute,
@@ -454,7 +443,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminMarketingRoute: AdminMarketingRoute,
   AdminPipelineRoute: AdminPipelineRoute,
   AdminPortalsRoute: AdminPortalsRoute,
-  AdminReportsRoute: AdminReportsRouteWithChildren,
+  AdminReportsRoute: AdminReportsRoute,
   AdminSalesRoute: AdminSalesRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminTeamRoute: AdminTeamRoute,
@@ -465,18 +454,9 @@ const rootRouteChildren: RootRouteChildren = {
   ClientLoginRoute: ClientLoginRoute,
   ClientSupportRoute: ClientSupportRoute,
   AdminLeadsLeadIdRoute: AdminLeadsLeadIdRoute,
+  AdminReportReportIdRoute: AdminReportReportIdRoute,
   AdminLeadsIndexRoute: AdminLeadsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
