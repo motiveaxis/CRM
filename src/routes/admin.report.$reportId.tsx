@@ -41,13 +41,22 @@ interface LeadRow extends LeadLite {
   lead_id: string;
 }
 
+function parseReportData(report: ReportRow): any {
+  let raw = report.data;
+  if (typeof raw === "string") {
+    try { raw = JSON.parse(raw); } catch { raw = null; }
+  }
+  return raw && typeof raw === "object" ? raw : null;
+}
+
 function prepareReportData(report: ReportRow): ReportData {
-  const raw = report.data && typeof report.data === "object" ? report.data : {};
+  const raw = parseReportData(report) ?? {};
+  const metaObj = raw.metadata && typeof raw.metadata === "object" ? raw.metadata : {};
   return {
     ...raw,
     metadata: {
-      ...(raw.metadata ?? {}),
-      report_id: raw.metadata?.report_id ?? report.report_id,
+      ...metaObj,
+      report_id: metaObj.report_id ?? report.report_id,
     },
     sections: Array.isArray(raw.sections) ? raw.sections : [],
   };
@@ -95,7 +104,8 @@ function ReportEditorPage() {
     if (report) setEdited(JSON.parse(JSON.stringify(prepareReportData(report))));
   }, [report]);
 
-  const isLegacy = !!report?.data && typeof report.data === "object" && !Array.isArray(report.data.sections);
+  const parsedData = report ? parseReportData(report) : null;
+  const isLegacy = !!report && (!parsedData || !Array.isArray(parsedData.sections));
 
   const previewHTML = useMemo(() => {
     if (!edited || isLegacy) return "";
@@ -105,7 +115,8 @@ function ReportEditorPage() {
   const saveDraft = useMutation({
     mutationFn: async () => {
       if (!report || !edited) return;
-      const nextData = { ...(report.data ?? {}), metadata: (report.data ?? {}).metadata, sections: edited.sections };
+      const base = parseReportData(report) ?? {};
+      const nextData = { ...base, metadata: base.metadata, sections: edited.sections };
       const { error } = await supabase.from("reports").update({ data: nextData }).eq("id", report.id);
       if (error) throw error;
     },
@@ -147,7 +158,8 @@ function ReportEditorPage() {
       if (!report || !edited) throw new Error("Report not loaded");
       if (report.qc_status !== "approved") throw new Error("Approve before sending");
       const html = generateReportHTML(edited, lead);
-      const nextData = { ...(report.data ?? {}), metadata: (report.data ?? {}).metadata, sections: edited.sections };
+      const base = parseReportData(report) ?? {};
+      const nextData = { ...base, metadata: base.metadata, sections: edited.sections };
       const nowIso = new Date().toISOString();
       const { error } = await supabase
         .from("reports")
@@ -231,7 +243,7 @@ function ReportEditorPage() {
 
       {isLegacy ? (
         <div className="ma-panel p-6 text-sm text-[color:var(--text-secondary)]">
-          This report uses a legacy format and cannot be edited. Generate a new report to use the editor.
+          This report ({report.report_id}) uses a legacy format and cannot be edited in the section editor. It was generated before the advanced reporting system was deployed. To edit reports with the new section-based editor, generate a new report from a lead.
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4" style={{ minHeight: "70vh" }}>
