@@ -41,13 +41,22 @@ interface LeadRow extends LeadLite {
   lead_id: string;
 }
 
+function parseReportData(report: ReportRow): any {
+  let raw = report.data;
+  if (typeof raw === "string") {
+    try { raw = JSON.parse(raw); } catch { raw = null; }
+  }
+  return raw && typeof raw === "object" ? raw : null;
+}
+
 function prepareReportData(report: ReportRow): ReportData {
-  const raw = report.data && typeof report.data === "object" ? report.data : {};
+  const raw = parseReportData(report) ?? {};
+  const metaObj = raw.metadata && typeof raw.metadata === "object" ? raw.metadata : {};
   return {
     ...raw,
     metadata: {
-      ...(raw.metadata ?? {}),
-      report_id: raw.metadata?.report_id ?? report.report_id,
+      ...metaObj,
+      report_id: metaObj.report_id ?? report.report_id,
     },
     sections: Array.isArray(raw.sections) ? raw.sections : [],
   };
