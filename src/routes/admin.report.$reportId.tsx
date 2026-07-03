@@ -158,7 +158,8 @@ function ReportEditorPage() {
       if (!report || !edited) throw new Error("Report not loaded");
       if (report.qc_status !== "approved") throw new Error("Approve before sending");
       const html = generateReportHTML(edited, lead);
-      const nextData = { ...(report.data ?? {}), metadata: (report.data ?? {}).metadata, sections: edited.sections };
+      const base = parseReportData(report) ?? {};
+      const nextData = { ...base, metadata: base.metadata, sections: edited.sections };
       const nowIso = new Date().toISOString();
       const { error } = await supabase
         .from("reports")
