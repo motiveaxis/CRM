@@ -88,8 +88,12 @@ function ReportEditorPage() {
 
   const [edited, setEdited] = useState<ReportData | null>(null);
   useEffect(() => {
+    if (!report) {
+      setEdited(null);
+      return;
+    }
     if (report) setEdited(JSON.parse(JSON.stringify(prepareReportData(report))));
-  }, [report?.id]);
+  }, [report]);
 
   const isLegacy = !!report?.data && typeof report.data === "object" && !Array.isArray(report.data.sections);
 
@@ -179,8 +183,9 @@ function ReportEditorPage() {
     onError: (e: any) => toast.error(e.message ?? "Send failed"),
   });
 
-  if (reportQ.isLoading || !edited) return <div className="text-sm text-[color:var(--text-secondary)]">Loading report…</div>;
+  if (reportQ.isLoading) return <div className="text-sm text-[color:var(--text-secondary)]">Loading report…</div>;
   if (!report) return <div className="text-sm">Report not found. <Link to="/admin/reports" className="underline">Back</Link></div>;
+  if (!edited) return <div className="text-sm text-[color:var(--text-secondary)]">Loading report…</div>;
 
   return (
     <div className="space-y-4">
