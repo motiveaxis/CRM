@@ -104,7 +104,8 @@ function ReportEditorPage() {
     if (report) setEdited(JSON.parse(JSON.stringify(prepareReportData(report))));
   }, [report]);
 
-  const isLegacy = !!report?.data && typeof report.data === "object" && !Array.isArray(report.data.sections);
+  const parsedData = report ? parseReportData(report) : null;
+  const isLegacy = !!report && (!parsedData || !Array.isArray(parsedData.sections));
 
   const previewHTML = useMemo(() => {
     if (!edited || isLegacy) return "";
