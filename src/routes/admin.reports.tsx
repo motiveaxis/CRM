@@ -211,7 +211,7 @@ function Reports() {
                     </td>
                     <td className="px-3 py-2 text-xs">
                       <Link
-                        to="/admin/reports/$reportId"
+                        to="/admin/report/$reportId"
                         params={{ reportId: r.id }}
                         onClick={(e) => e.stopPropagation()}
                         className="text-[color:var(--accent-red)] hover:underline"
