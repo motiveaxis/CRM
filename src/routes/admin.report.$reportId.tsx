@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AdminShell } from "@/components/admin-shell";
 import { StaffGuard } from "@/components/guards";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +41,18 @@ interface LeadRow extends LeadLite {
   lead_id: string;
 }
 
+function prepareReportData(report: ReportRow): ReportData {
+  const raw = report.data && typeof report.data === "object" ? report.data : {};
+  return {
+    ...raw,
+    metadata: {
+      ...(raw.metadata ?? {}),
+      report_id: raw.metadata?.report_id ?? report.report_id,
+    },
+    sections: Array.isArray(raw.sections) ? raw.sections : [],
+  };
+}
+
 async function fetchReport(reportId: string) {
   const { data, error } = await supabase
     .from("reports")
@@ -76,10 +88,14 @@ function ReportEditorPage() {
 
   const [edited, setEdited] = useState<ReportData | null>(null);
   useEffect(() => {
-    if (report?.data) setEdited(JSON.parse(JSON.stringify(report.data)));
-  }, [report?.id]);
+    if (!report) {
+      setEdited(null);
+      return;
+    }
+    if (report) setEdited(JSON.parse(JSON.stringify(prepareReportData(report))));
+  }, [report]);
 
-  const isLegacy = !!edited && !Array.isArray(edited.sections);
+  const isLegacy = !!report?.data && typeof report.data === "object" && !Array.isArray(report.data.sections);
 
   const previewHTML = useMemo(() => {
     if (!edited || isLegacy) return "";
@@ -169,6 +185,7 @@ function ReportEditorPage() {
 
   if (reportQ.isLoading) return <div className="text-sm text-[color:var(--text-secondary)]">Loading report…</div>;
   if (!report) return <div className="text-sm">Report not found. <Link to="/admin/reports" className="underline">Back</Link></div>;
+  if (!edited) return <div className="text-sm text-[color:var(--text-secondary)]">Loading report…</div>;
 
   return (
     <div className="space-y-4">
@@ -408,7 +425,7 @@ function SectionBody({ section, onChange }: { section: ReportSection; onChange: 
   }
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div>
       <div className="ma-label mb-1">{label}</div>
