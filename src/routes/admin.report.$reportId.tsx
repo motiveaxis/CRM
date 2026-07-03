@@ -115,7 +115,8 @@ function ReportEditorPage() {
   const saveDraft = useMutation({
     mutationFn: async () => {
       if (!report || !edited) return;
-      const nextData = { ...(report.data ?? {}), metadata: (report.data ?? {}).metadata, sections: edited.sections };
+      const base = parseReportData(report) ?? {};
+      const nextData = { ...base, metadata: base.metadata, sections: edited.sections };
       const { error } = await supabase.from("reports").update({ data: nextData }).eq("id", report.id);
       if (error) throw error;
     },
