@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -39,23 +39,17 @@ interface Stage {
   agent_action: string | null;
 }
 
-interface Deal {
+interface LeadCard {
   id: string;
-  deal_id: string;
-  lead_id: string | null;
-  stage: string;
-  deal_value: number | null;
-  pricing_tier: string | null;
-  close_probability: number | null;
-  notes: string | null;
+  lead_id: string;
+  company_name: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  status: string;
+  priority: string | null;
+  hermes_lead_id: string | null;
   updated_at: string;
-  lead?: {
-    company_name: string;
-    first_name: string | null;
-    last_name: string | null;
-    hermes_lead_id: string | null;
-    priority: string | null;
-  } | null;
 }
 
 async function fetchStages(): Promise<Stage[]> {
@@ -67,15 +61,15 @@ async function fetchStages(): Promise<Stage[]> {
   return (data ?? []) as Stage[];
 }
 
-async function fetchDeals(): Promise<Deal[]> {
+async function fetchLeads(): Promise<LeadCard[]> {
   const { data, error } = await supabase
-    .from("deals")
+    .from("leads")
     .select(
-      "id,deal_id,lead_id,stage,deal_value,pricing_tier,close_probability,notes,updated_at,lead:leads(company_name,first_name,last_name,hermes_lead_id,priority)",
+      "id,lead_id,company_name,first_name,last_name,email,status,priority,hermes_lead_id,updated_at",
     )
     .order("updated_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []) as unknown as Deal[];
+  return (data ?? []) as LeadCard[];
 }
 
 function Pipeline() {
@@ -84,77 +78,82 @@ function Pipeline() {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const stagesQ = useQuery({ queryKey: ["pipeline-stages"], queryFn: fetchStages });
-  const dealsQ = useQuery({ queryKey: ["pipeline-deals"], queryFn: fetchDeals });
+  const leadsQ = useQuery({ queryKey: ["pipeline-leads"], queryFn: fetchLeads });
+
+  // Realtime sync
+  useEffect(() => {
+    const ch = supabase
+      .channel("pipeline-leads-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, () => {
+        qc.invalidateQueries({ queryKey: ["pipeline-leads"] });
+        qc.invalidateQueries({ queryKey: ["leads"] });
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [qc]);
 
   const moveMutation = useMutation({
-    mutationFn: async ({ id, stage }: { id: string; stage: string }) => {
-      const { error } = await supabase.from("deals").update({ stage }).eq("id", id);
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase.from("leads").update({ status }).eq("id", id);
       if (error) throw error;
     },
-    onMutate: async ({ id, stage }) => {
-      await qc.cancelQueries({ queryKey: ["pipeline-deals"] });
-      const prev = qc.getQueryData<Deal[]>(["pipeline-deals"]);
-      qc.setQueryData<Deal[]>(["pipeline-deals"], (old) =>
-        (old ?? []).map((d) => (d.id === id ? { ...d, stage } : d)),
+    onMutate: async ({ id, status }) => {
+      await qc.cancelQueries({ queryKey: ["pipeline-leads"] });
+      const prev = qc.getQueryData<LeadCard[]>(["pipeline-leads"]);
+      qc.setQueryData<LeadCard[]>(["pipeline-leads"], (old) =>
+        (old ?? []).map((d) => (d.id === id ? { ...d, status } : d)),
       );
       return { prev };
     },
     onError: (_e, _v, ctx) => {
-      if (ctx?.prev) qc.setQueryData(["pipeline-deals"], ctx.prev);
-      toast.error("Failed to move deal");
+      if (ctx?.prev) qc.setQueryData(["pipeline-leads"], ctx.prev);
+      toast.error("Failed to move lead");
     },
-    onSuccess: () => toast.success("Deal moved"),
-    onSettled: () => qc.invalidateQueries({ queryKey: ["pipeline-deals"] }),
+    onSuccess: () => toast.success("Lead moved"),
+    onSettled: () => {
+      qc.invalidateQueries({ queryKey: ["pipeline-leads"] });
+      qc.invalidateQueries({ queryKey: ["leads"] });
+    },
   });
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
-  const dealsByStage = useMemo(() => {
-    const map = new Map<string, Deal[]>();
+  const leadsByStage = useMemo(() => {
+    const map = new Map<string, LeadCard[]>();
     for (const s of stagesQ.data ?? []) map.set(s.slug, []);
-    for (const d of dealsQ.data ?? []) {
-      const arr = map.get(d.stage) ?? [];
-      arr.push(d);
-      map.set(d.stage, arr);
+    const unassigned: LeadCard[] = [];
+    for (const l of leadsQ.data ?? []) {
+      if (map.has(l.status)) {
+        map.get(l.status)!.push(l);
+      } else {
+        unassigned.push(l);
+      }
     }
-    return map;
-  }, [stagesQ.data, dealsQ.data]);
+    return { map, unassigned };
+  }, [stagesQ.data, leadsQ.data]);
 
-  const totalsByStage = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const [slug, list] of dealsByStage)
-      map.set(slug, list.reduce((s, d) => s + Number(d.deal_value ?? 0), 0));
-    return map;
-  }, [dealsByStage]);
-
-  const totalPipeline = useMemo(
-    () =>
-      (dealsQ.data ?? [])
-        .filter((d) => d.stage !== "closed_won" && d.stage !== "closed_lost")
-        .reduce((s, d) => s + Number(d.deal_value ?? 0), 0),
-    [dealsQ.data],
-  );
-
-  const activeDeal = (dealsQ.data ?? []).find((d) => d.id === activeId) ?? null;
+  const activeLead = (leadsQ.data ?? []).find((d) => d.id === activeId) ?? null;
 
   function onDragEnd(e: DragEndEvent) {
     setActiveId(null);
-    const dealId = String(e.active.id);
+    const leadId = String(e.active.id);
     const overId = e.over?.id ? String(e.over.id) : null;
     if (!overId) return;
-    const deal = (dealsQ.data ?? []).find((d) => d.id === dealId);
-    if (!deal || deal.stage === overId) return;
-    moveMutation.mutate({ id: dealId, stage: overId });
+    const lead = (leadsQ.data ?? []).find((d) => d.id === leadId);
+    if (!lead || lead.status === overId) return;
+    moveMutation.mutate({ id: leadId, status: overId });
   }
+
+  const total = (leadsQ.data ?? []).length;
 
   return (
     <div className="space-y-5">
       <div className="flex items-end justify-between gap-4">
         <div>
           <h1>Pipeline</h1>
-          <div className="ma-label mt-2">
-            {(dealsQ.data ?? []).length} deals · ${Math.round(totalPipeline).toLocaleString()} active
-          </div>
+          <div className="ma-label mt-2">{total} leads across {(stagesQ.data ?? []).length} stages</div>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -174,6 +173,21 @@ function Pipeline() {
         </div>
       </div>
 
+      {leadsByStage.unassigned.length > 0 && (
+        <div className="ma-panel p-3 border-[color:var(--accent-red)]/40">
+          <div className="ma-label mb-2 text-[color:var(--accent-red)]">
+            {leadsByStage.unassigned.length} lead(s) with unrecognized status
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {leadsByStage.unassigned.map((l) => (
+              <div key={l.id} className="text-[11px] font-mono text-[color:var(--text-secondary)]">
+                {l.lead_id} → <span className="text-white">{l.status}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {view === "kanban" ? (
         <DndContext
           sensors={sensors}
@@ -186,21 +200,20 @@ function Pipeline() {
               <StageColumn
                 key={s.slug}
                 stage={s}
-                deals={dealsByStage.get(s.slug) ?? []}
-                total={totalsByStage.get(s.slug) ?? 0}
+                leads={leadsByStage.map.get(s.slug) ?? []}
               />
             ))}
           </div>
-          <DragOverlay>{activeDeal ? <DealCard deal={activeDeal} dragging /> : null}</DragOverlay>
+          <DragOverlay>{activeLead ? <LeadCardView lead={activeLead} dragging /> : null}</DragOverlay>
         </DndContext>
       ) : (
-        <DealList deals={dealsQ.data ?? []} stages={stagesQ.data ?? []} />
+        <LeadList leads={leadsQ.data ?? []} stages={stagesQ.data ?? []} />
       )}
     </div>
   );
 }
 
-function StageColumn({ stage, deals, total }: { stage: Stage; deals: Deal[]; total: number }) {
+function StageColumn({ stage, leads }: { stage: Stage; leads: LeadCard[] }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage.slug });
   return (
     <div
@@ -219,18 +232,18 @@ function StageColumn({ stage, deals, total }: { stage: Stage; deals: Deal[]; tot
             {stage.name}
           </div>
           <div className="ml-auto text-[10px] text-[color:var(--text-secondary)] font-mono">
-            {deals.length}
+            {leads.length}
           </div>
         </div>
         <div className="ma-label mt-1 text-[10px]">
-          {stage.agent_owner ?? "—"} · ${Math.round(total).toLocaleString()}
+          {stage.agent_owner ?? "—"}
         </div>
       </div>
       <div className="p-2 flex-1 space-y-2 min-h-[120px]">
-        {deals.map((d) => (
-          <DraggableDeal key={d.id} deal={d} />
+        {leads.map((l) => (
+          <DraggableLead key={l.id} lead={l} />
         ))}
-        {deals.length === 0 && (
+        {leads.length === 0 && (
           <div className="text-[11px] text-[color:var(--text-secondary)] px-2 py-4 text-center">
             {stage.agent_action ?? "Empty"}
           </div>
@@ -240,8 +253,8 @@ function StageColumn({ stage, deals, total }: { stage: Stage; deals: Deal[]; tot
   );
 }
 
-function DraggableDeal({ deal }: { deal: Deal }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: deal.id });
+function DraggableLead({ lead }: { lead: LeadCard }) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: lead.id });
   return (
     <div
       ref={setNodeRef}
@@ -249,89 +262,84 @@ function DraggableDeal({ deal }: { deal: Deal }) {
       {...listeners}
       style={{ opacity: isDragging ? 0.4 : 1 }}
     >
-      <DealCard deal={deal} />
+      <LeadCardView lead={lead} />
     </div>
   );
 }
 
-function DealCard({ deal, dragging }: { deal: Deal; dragging?: boolean }) {
-  const name = [deal.lead?.first_name, deal.lead?.last_name].filter(Boolean).join(" ");
+function LeadCardView({ lead, dragging }: { lead: LeadCard; dragging?: boolean }) {
+  const name = [lead.first_name, lead.last_name].filter(Boolean).join(" ");
   return (
-    <div
-      className={`bg-[color:var(--surface-2)] border border-[color:var(--border)] rounded p-2.5 cursor-grab active:cursor-grabbing ${
+    <Link
+      to="/admin/leads/$leadId"
+      params={{ leadId: lead.id }}
+      onPointerDown={(e) => e.stopPropagation()}
+      className={`block bg-[color:var(--surface-2)] border border-[color:var(--border)] rounded p-2.5 cursor-grab active:cursor-grabbing ${
         dragging ? "shadow-lg" : "hover:border-[color:var(--accent-red)]"
       }`}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="text-xs font-mono text-[color:var(--text-secondary)] truncate">
-          {deal.deal_id}
+          {lead.lead_id}
         </div>
-        {deal.lead?.hermes_lead_id && (
+        {lead.hermes_lead_id && (
           <span className="text-[9px] font-mono text-[color:var(--accent-red)]">HX</span>
         )}
       </div>
       <div className="text-sm font-semibold text-white mt-1 truncate">
-        {deal.lead?.company_name ?? "—"}
+        {lead.company_name ?? name ?? "—"}
       </div>
-      {name && (
+      {name && lead.company_name && (
         <div className="text-[11px] text-[color:var(--text-secondary)] truncate">{name}</div>
       )}
-      <div className="flex items-center justify-between mt-2">
-        <div className="text-xs font-mono text-white">
-          ${Math.round(Number(deal.deal_value ?? 0)).toLocaleString()}
+      {lead.email && (
+        <div className="text-[10px] text-[color:var(--text-secondary)] truncate mt-0.5">
+          {lead.email}
         </div>
-        {deal.close_probability != null && (
-          <div className="text-[10px] text-[color:var(--text-secondary)]">
-            {deal.close_probability}%
-          </div>
-        )}
-      </div>
-    </div>
+      )}
+      {lead.priority && (
+        <div className="text-[10px] text-[color:var(--text-secondary)] uppercase mt-1">
+          {lead.priority}
+        </div>
+      )}
+    </Link>
   );
 }
 
-function DealList({ deals, stages }: { deals: Deal[]; stages: Stage[] }) {
+function LeadList({ leads, stages }: { leads: LeadCard[]; stages: Stage[] }) {
   const stageName = (slug: string) => stages.find((s) => s.slug === slug)?.name ?? slug;
   return (
     <div className="ma-panel overflow-hidden">
       <table className="w-full text-sm">
         <thead className="bg-[color:var(--surface-2)] text-[color:var(--text-secondary)]">
           <tr className="text-left">
-            <th className="px-3 py-2 font-medium text-xs uppercase tracking-wider">Deal</th>
+            <th className="px-3 py-2 font-medium text-xs uppercase tracking-wider">Lead</th>
             <th className="px-3 py-2 font-medium text-xs uppercase tracking-wider">Company</th>
             <th className="px-3 py-2 font-medium text-xs uppercase tracking-wider">Stage</th>
-            <th className="px-3 py-2 font-medium text-xs uppercase tracking-wider">Value</th>
-            <th className="px-3 py-2 font-medium text-xs uppercase tracking-wider">Prob</th>
+            <th className="px-3 py-2 font-medium text-xs uppercase tracking-wider">Priority</th>
             <th className="px-3 py-2 font-medium text-xs uppercase tracking-wider">Updated</th>
           </tr>
         </thead>
         <tbody>
-          {deals.map((d) => (
+          {leads.map((d) => (
             <tr key={d.id} className="border-t border-[color:var(--border)] hover:bg-[color:var(--surface-2)]">
               <td className="px-3 py-2 font-mono text-xs">
-                {d.lead_id ? (
-                  <Link to="/admin/leads/$leadId" params={{ leadId: d.lead_id }} className="hover:text-[color:var(--accent-red)]">
-                    {d.deal_id}
-                  </Link>
-                ) : (
-                  d.deal_id
-                )}
+                <Link to="/admin/leads/$leadId" params={{ leadId: d.id }} className="hover:text-[color:var(--accent-red)]">
+                  {d.lead_id}
+                </Link>
               </td>
-              <td className="px-3 py-2 text-white">{d.lead?.company_name ?? "—"}</td>
-              <td className="px-3 py-2">{stageName(d.stage)}</td>
-              <td className="px-3 py-2 font-mono">
-                ${Math.round(Number(d.deal_value ?? 0)).toLocaleString()}
-              </td>
-              <td className="px-3 py-2 font-mono">{d.close_probability ?? "—"}</td>
+              <td className="px-3 py-2 text-white">{d.company_name ?? "—"}</td>
+              <td className="px-3 py-2">{stageName(d.status)}</td>
+              <td className="px-3 py-2 text-[color:var(--text-secondary)]">{d.priority ?? "—"}</td>
               <td className="px-3 py-2 text-xs text-[color:var(--text-secondary)]">
                 {new Date(d.updated_at).toLocaleDateString()}
               </td>
             </tr>
           ))}
-          {deals.length === 0 && (
+          {leads.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-3 py-8 text-center text-[color:var(--text-secondary)]">
-                No deals yet. Deals are created from the Leads module when a lead is qualified.
+              <td colSpan={5} className="px-3 py-8 text-center text-[color:var(--text-secondary)]">
+                No leads yet.
               </td>
             </tr>
           )}
