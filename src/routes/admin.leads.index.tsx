@@ -54,7 +54,19 @@ interface Lead {
   updated_at: string;
 }
 
-const STATUS_OPTIONS = ["new", "contacted", "qualified", "report_sent", "negotiation", "closed_won", "closed_lost"];
+const STATUS_OPTIONS = [
+  "new",
+  "lead_qualified",
+  "report_generation",
+  "report_qc_pending",
+  "report_qc_approved",
+  "report_sent",
+  "engaged",
+  "conversion_signal",
+  "proposal",
+  "closed_won",
+  "closed_lost",
+];
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
 const SOURCE_OPTIONS = ["website", "referral", "outbound", "linkedin", "event", "other"];
 
