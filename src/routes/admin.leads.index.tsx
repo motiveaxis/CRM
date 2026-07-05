@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AdminShell } from "@/components/admin-shell";
 import { StaffGuard } from "@/components/guards";
 import { supabase } from "@/integrations/supabase/client";
@@ -54,7 +54,19 @@ interface Lead {
   updated_at: string;
 }
 
-const STATUS_OPTIONS = ["new", "contacted", "qualified", "report_sent", "negotiation", "closed_won", "closed_lost"];
+const STATUS_OPTIONS = [
+  "new",
+  "lead_qualified",
+  "report_generation",
+  "report_qc_pending",
+  "report_qc_approved",
+  "report_sent",
+  "engaged",
+  "conversion_signal",
+  "proposal",
+  "closed_won",
+  "closed_lost",
+];
 const PRIORITY_OPTIONS = ["low", "medium", "high", "urgent"];
 const SOURCE_OPTIONS = ["website", "referral", "outbound", "linkedin", "event", "other"];
 
@@ -91,6 +103,19 @@ function LeadsList() {
       return { rows: (data ?? []) as Lead[], count: count ?? 0 };
     },
   });
+
+  useEffect(() => {
+    const ch = supabase
+      .channel("leads-list-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, () => {
+        qc.invalidateQueries({ queryKey: ["leads"] });
+        qc.invalidateQueries({ queryKey: ["pipeline-leads"] });
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [qc]);
 
   const totalPages = Math.max(1, Math.ceil((data?.count ?? 0) / PAGE_SIZE));
 
