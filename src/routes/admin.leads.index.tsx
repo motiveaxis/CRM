@@ -104,6 +104,19 @@ function LeadsList() {
     },
   });
 
+  useEffect(() => {
+    const ch = supabase
+      .channel("leads-list-rt")
+      .on("postgres_changes", { event: "*", schema: "public", table: "leads" }, () => {
+        qc.invalidateQueries({ queryKey: ["leads"] });
+        qc.invalidateQueries({ queryKey: ["pipeline-leads"] });
+      })
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [qc]);
+
   const totalPages = Math.max(1, Math.ceil((data?.count ?? 0) / PAGE_SIZE));
 
   function exportCsv() {
