@@ -126,11 +126,29 @@ function Pipeline() {
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
+  const filteredLeads = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const from = dateFrom ? new Date(dateFrom).getTime() : null;
+    const to = dateTo ? new Date(dateTo).getTime() + 86400000 : null;
+    return (leadsQ.data ?? []).filter((l) => {
+      if (priority !== "all" && (l.priority ?? "") !== priority) return false;
+      const t = new Date(l.updated_at).getTime();
+      if (from !== null && t < from) return false;
+      if (to !== null && t > to) return false;
+      if (q) {
+        const hay = [l.lead_id, l.company_name, l.first_name, l.last_name, l.email]
+          .filter(Boolean).join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [leadsQ.data, search, priority, dateFrom, dateTo]);
+
   const leadsByStage = useMemo(() => {
     const map = new Map<string, LeadCard[]>();
     for (const s of stagesQ.data ?? []) map.set(s.slug, []);
     const unassigned: LeadCard[] = [];
-    for (const l of leadsQ.data ?? []) {
+    for (const l of filteredLeads) {
       if (map.has(l.status)) {
         map.get(l.status)!.push(l);
       } else {
@@ -138,7 +156,7 @@ function Pipeline() {
       }
     }
     return { map, unassigned };
-  }, [stagesQ.data, leadsQ.data]);
+  }, [stagesQ.data, filteredLeads]);
 
   const activeLead = (leadsQ.data ?? []).find((d) => d.id === activeId) ?? null;
 
