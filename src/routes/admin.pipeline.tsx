@@ -16,7 +16,9 @@ import { StaffGuard } from "@/components/guards";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Kanban, List as ListIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Kanban, List as ListIcon, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin/pipeline")({
   head: () => ({ meta: [{ title: "Pipeline — MotiveAxis CRM" }] }),
@@ -76,6 +78,10 @@ function Pipeline() {
   const qc = useQueryClient();
   const [view, setView] = useState<"kanban" | "list">("kanban");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [priority, setPriority] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
 
   const stagesQ = useQuery({ queryKey: ["pipeline-stages"], queryFn: fetchStages });
   const leadsQ = useQuery({ queryKey: ["pipeline-leads"], queryFn: fetchLeads });
@@ -120,11 +126,29 @@ function Pipeline() {
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
+  const filteredLeads = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const from = dateFrom ? new Date(dateFrom).getTime() : null;
+    const to = dateTo ? new Date(dateTo).getTime() + 86400000 : null;
+    return (leadsQ.data ?? []).filter((l) => {
+      if (priority !== "all" && (l.priority ?? "") !== priority) return false;
+      const t = new Date(l.updated_at).getTime();
+      if (from !== null && t < from) return false;
+      if (to !== null && t > to) return false;
+      if (q) {
+        const hay = [l.lead_id, l.company_name, l.first_name, l.last_name, l.email]
+          .filter(Boolean).join(" ").toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [leadsQ.data, search, priority, dateFrom, dateTo]);
+
   const leadsByStage = useMemo(() => {
     const map = new Map<string, LeadCard[]>();
     for (const s of stagesQ.data ?? []) map.set(s.slug, []);
     const unassigned: LeadCard[] = [];
-    for (const l of leadsQ.data ?? []) {
+    for (const l of filteredLeads) {
       if (map.has(l.status)) {
         map.get(l.status)!.push(l);
       } else {
@@ -132,7 +156,7 @@ function Pipeline() {
       }
     }
     return { map, unassigned };
-  }, [stagesQ.data, leadsQ.data]);
+  }, [stagesQ.data, filteredLeads]);
 
   const activeLead = (leadsQ.data ?? []).find((d) => d.id === activeId) ?? null;
 
@@ -146,32 +170,71 @@ function Pipeline() {
     moveMutation.mutate({ id: leadId, status: overId });
   }
 
-  const total = (leadsQ.data ?? []).length;
+  const total = filteredLeads.length;
+  const grandTotal = (leadsQ.data ?? []).length;
+  const filtersActive = !!(search || priority !== "all" || dateFrom || dateTo);
 
   return (
     <div className="space-y-5">
       <div className="flex items-end justify-between gap-4">
         <div>
           <h1>Pipeline</h1>
-          <div className="ma-label mt-2">{total} leads across {(stagesQ.data ?? []).length} stages</div>
+          <div className="ma-label mt-2">
+            {total}{filtersActive ? ` of ${grandTotal}` : ""} leads across {(stagesQ.data ?? []).length} stages
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant={view === "kanban" ? "default" : "outline"}
-            onClick={() => setView("kanban")}
-          >
+          <Button size="sm" variant={view === "kanban" ? "default" : "outline"} onClick={() => setView("kanban")}>
             <Kanban size={14} /> Kanban
           </Button>
-          <Button
-            size="sm"
-            variant={view === "list" ? "default" : "outline"}
-            onClick={() => setView("list")}
-          >
+          <Button size="sm" variant={view === "list" ? "default" : "outline"} onClick={() => setView("list")}>
             <ListIcon size={14} /> List
           </Button>
         </div>
       </div>
+
+      <div className="ma-panel p-3 flex flex-wrap items-end gap-3">
+        <div className="flex flex-col gap-1">
+          <label className="ma-label text-[10px]">Search</label>
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Lead ID, company, name, email"
+            className="h-8 w-[240px]"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="ma-label text-[10px]">Priority</label>
+          <Select value={priority} onValueChange={setPriority}>
+            <SelectTrigger className="h-8 w-[140px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All priorities</SelectItem>
+              <SelectItem value="urgent">Urgent</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="low">Low</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="ma-label text-[10px]">Updated from</label>
+          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-8 w-[150px]" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="ma-label text-[10px]">Updated to</label>
+          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-8 w-[150px]" />
+        </div>
+        {filtersActive && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => { setSearch(""); setPriority("all"); setDateFrom(""); setDateTo(""); }}
+          >
+            <X size={14} /> Clear
+          </Button>
+        )}
+      </div>
+
 
       {leadsByStage.unassigned.length > 0 && (
         <div className="ma-panel p-3 border-[color:var(--accent-red)]/40">
@@ -207,7 +270,7 @@ function Pipeline() {
           <DragOverlay>{activeLead ? <LeadCardView lead={activeLead} dragging /> : null}</DragOverlay>
         </DndContext>
       ) : (
-        <LeadList leads={leadsQ.data ?? []} stages={stagesQ.data ?? []} />
+        <LeadList leads={filteredLeads} stages={stagesQ.data ?? []} />
       )}
     </div>
   );
