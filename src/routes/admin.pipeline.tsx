@@ -16,7 +16,9 @@ import { StaffGuard } from "@/components/guards";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Kanban, List as ListIcon } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Kanban, List as ListIcon, X } from "lucide-react";
 
 export const Route = createFileRoute("/admin/pipeline")({
   head: () => ({ meta: [{ title: "Pipeline — MotiveAxis CRM" }] }),
