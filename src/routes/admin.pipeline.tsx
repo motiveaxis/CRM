@@ -170,32 +170,71 @@ function Pipeline() {
     moveMutation.mutate({ id: leadId, status: overId });
   }
 
-  const total = (leadsQ.data ?? []).length;
+  const total = filteredLeads.length;
+  const grandTotal = (leadsQ.data ?? []).length;
+  const filtersActive = !!(search || priority !== "all" || dateFrom || dateTo);
 
   return (
     <div className="space-y-5">
       <div className="flex items-end justify-between gap-4">
         <div>
           <h1>Pipeline</h1>
-          <div className="ma-label mt-2">{total} leads across {(stagesQ.data ?? []).length} stages</div>
+          <div className="ma-label mt-2">
+            {total}{filtersActive ? ` of ${grandTotal}` : ""} leads across {(stagesQ.data ?? []).length} stages
+          </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant={view === "kanban" ? "default" : "outline"}
-            onClick={() => setView("kanban")}
-          >
+          <Button size="sm" variant={view === "kanban" ? "default" : "outline"} onClick={() => setView("kanban")}>
             <Kanban size={14} /> Kanban
           </Button>
-          <Button
-            size="sm"
-            variant={view === "list" ? "default" : "outline"}
-            onClick={() => setView("list")}
-          >
+          <Button size="sm" variant={view === "list" ? "default" : "outline"} onClick={() => setView("list")}>
             <ListIcon size={14} /> List
           </Button>
         </div>
       </div>
+
+      <div className="ma-panel p-3 flex flex-wrap items-end gap-3">
+        <div className="flex flex-col gap-1">
+          <label className="ma-label text-[10px]">Search</label>
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Lead ID, company, name, email"
+            className="h-8 w-[240px]"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="ma-label text-[10px]">Priority</label>
+          <Select value={priority} onValueChange={setPriority}>
+            <SelectTrigger className="h-8 w-[140px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All priorities</SelectItem>
+              <SelectItem value="urgent">Urgent</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="low">Low</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="ma-label text-[10px]">Updated from</label>
+          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="h-8 w-[150px]" />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="ma-label text-[10px]">Updated to</label>
+          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="h-8 w-[150px]" />
+        </div>
+        {filtersActive && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => { setSearch(""); setPriority("all"); setDateFrom(""); setDateTo(""); }}
+          >
+            <X size={14} /> Clear
+          </Button>
+        )}
+      </div>
+
 
       {leadsByStage.unassigned.length > 0 && (
         <div className="ma-panel p-3 border-[color:var(--accent-red)]/40">
