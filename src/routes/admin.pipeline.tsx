@@ -270,7 +270,7 @@ function Pipeline() {
           <DragOverlay>{activeLead ? <LeadCardView lead={activeLead} dragging /> : null}</DragOverlay>
         </DndContext>
       ) : (
-        <LeadList leads={leadsQ.data ?? []} stages={stagesQ.data ?? []} />
+        <LeadList leads={filteredLeads} stages={stagesQ.data ?? []} />
       )}
     </div>
   );
