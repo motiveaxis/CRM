@@ -78,6 +78,10 @@ function Pipeline() {
   const qc = useQueryClient();
   const [view, setView] = useState<"kanban" | "list">("kanban");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [priority, setPriority] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
 
   const stagesQ = useQuery({ queryKey: ["pipeline-stages"], queryFn: fetchStages });
   const leadsQ = useQuery({ queryKey: ["pipeline-leads"], queryFn: fetchLeads });
