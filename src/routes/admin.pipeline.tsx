@@ -336,7 +336,7 @@ function LeadCardView({ lead, dragging }: { lead: LeadCard; dragging?: boolean }
     <Link
       to="/admin/leads/$leadId"
       params={{ leadId: lead.id }}
-      onPointerDown={(e) => e.stopPropagation()}
+      
       className={`block bg-[color:var(--surface-2)] border border-[color:var(--border)] rounded p-2.5 cursor-grab active:cursor-grabbing ${
         dragging ? "shadow-lg" : "hover:border-[color:var(--accent-red)]"
       }`}
