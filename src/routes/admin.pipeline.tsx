@@ -123,7 +123,7 @@ function Pipeline() {
           .limit(1)
           .maybeSingle();
         if (latest?.id) {
-          await supabase.from("reports").update(reportPatch).eq("id", latest.id);
+          await supabase.from("reports").update(reportPatch as any).eq("id", latest.id);
         }
       }
     },
