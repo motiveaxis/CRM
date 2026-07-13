@@ -82,8 +82,8 @@ export const Route = createFileRoute("/api/public/seed-demo-client")({
           if (leadRow) {
             leadId = leadRow.id;
           } else {
-            const { data: newLead, error: leadErr } = await supabaseAdmin
-              .from("leads")
+            const { data: newLead, error: leadErr } = await (supabaseAdmin
+              .from("leads") as any)
               .insert({
                 company_name,
                 first_name: contact_name.split(" ")[0] ?? contact_name,
