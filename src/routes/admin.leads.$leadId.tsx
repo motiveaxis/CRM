@@ -387,3 +387,70 @@ function Row({ k, v }: { k: string; v: string | null | undefined }) {
     </div>
   );
 }
+
+function LeadReportsPanel({ leadId }: { leadId: string }) {
+  const navigate = useNavigate();
+  const { data: reports = [] } = useQuery({
+    queryKey: ["lead-reports", leadId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("reports")
+        .select("id,report_id,report_status,qc_status,pdf_url,sent_at,created_at,updated_at")
+        .eq("lead_id", leadId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  return (
+    <div className="ma-panel p-5">
+      <div className="flex items-center justify-between mb-3">
+        <div className="ma-label">Reports ({reports.length})</div>
+      </div>
+      {reports.length === 0 ? (
+        <p className="text-xs text-[color:var(--text-secondary)]">No reports attached to this lead yet.</p>
+      ) : (
+        <ul className="divide-y divide-[color:var(--border)]">
+          {reports.map((r: any) => (
+            <li
+              key={r.id}
+              className="py-3 flex items-center justify-between gap-4 cursor-pointer hover:bg-[color:var(--surface-2)]/40 -mx-2 px-2 rounded"
+              onClick={() => navigate({ to: "/admin/report/$reportId", params: { reportId: r.id } })}
+            >
+              <div className="min-w-0 flex items-center gap-3 flex-wrap">
+                <span className="font-mono text-xs text-white">{r.report_id}</span>
+                <ReportChip label="status" value={r.report_status} />
+                <ReportChip label="qc" value={r.qc_status ?? "none"} />
+                {r.sent_at && <span className="font-mono text-[10px] text-[color:var(--text-secondary)]">sent {new Date(r.sent_at).toLocaleDateString()}</span>}
+              </div>
+              <div className="flex items-center gap-3 shrink-0">
+                {r.pdf_url && (
+                  <a href={r.pdf_url} target="_blank" rel="noreferrer" onClick={(e) => e.stopPropagation()} className="font-mono text-[10px] text-[color:var(--text-secondary)] hover:text-white">PDF ↗</a>
+                )}
+                <span className="font-mono text-[10px] text-[color:var(--text-secondary)]">{new Date(r.created_at).toLocaleDateString()}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function ReportChip({ label, value }: { label: string; value: string | null }) {
+  const v = value ?? "—";
+  const isApproved = v === "approved" || v === "sent" || v === "qc_approved";
+  return (
+    <span
+      className="font-mono text-[10px] uppercase px-1.5 py-0.5 rounded"
+      style={
+        isApproved
+          ? { border: "1px solid #FF001E", color: "#FF001E", background: "rgba(255,0,30,0.08)" }
+          : { border: "1px solid #2A2A2A", color: "#8A8A93" }
+      }
+    >
+      {label}: {v}
+    </span>
+  );
+}
