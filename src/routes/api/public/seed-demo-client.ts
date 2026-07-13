@@ -146,8 +146,8 @@ export const Route = createFileRoute("/api/public/seed-demo-client")({
           if (updErr) return new Response(updErr.message, { status: 500 });
           clientId = existingClient.id;
         } else {
-          const { data: newClient, error: clientErr } = await supabaseAdmin
-            .from("clients")
+          const { data: newClient, error: clientErr } = await (supabaseAdmin
+            .from("clients") as any)
             .insert({
               lead_id: leadId!,
               deal_id: dealId!,
