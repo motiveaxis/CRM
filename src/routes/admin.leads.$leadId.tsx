@@ -184,6 +184,7 @@ function LeadDetail() {
         </div>
       </div>
 
+      <LeadReportsPanel leadId={leadId} />
       <LeadAxisDiagnostic lead={form} />
       <InteractionsPanel leadId={leadId} />
     </div>
