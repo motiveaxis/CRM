@@ -110,8 +110,8 @@ export const Route = createFileRoute("/api/public/seed-demo-client")({
         if (dealRow) {
           dealId = dealRow.id;
         } else {
-          const { data: newDeal, error: dealErr } = await supabaseAdmin
-            .from("deals")
+          const { data: newDeal, error: dealErr } = await (supabaseAdmin
+            .from("deals") as any)
             .insert({
               lead_id: leadId!,
               company_name,
