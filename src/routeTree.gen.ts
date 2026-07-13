@@ -27,6 +27,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin.login'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminClientsRouteImport } from './routes/admin.clients'
 import { Route as AdminLeadsIndexRouteImport } from './routes/admin.leads.index'
+import { Route as ApiPublicSeedDemoClientRouteImport } from './routes/api/public/seed-demo-client'
 import { Route as AdminReportReportIdRouteImport } from './routes/admin.report.$reportId'
 import { Route as AdminLeadsLeadIdRouteImport } from './routes/admin.leads.$leadId'
 
@@ -120,6 +121,11 @@ const AdminLeadsIndexRoute = AdminLeadsIndexRouteImport.update({
   path: '/admin/leads/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicSeedDemoClientRoute = ApiPublicSeedDemoClientRouteImport.update({
+  id: '/api/public/seed-demo-client',
+  path: '/api/public/seed-demo-client',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminReportReportIdRoute = AdminReportReportIdRouteImport.update({
   id: '/admin/report/$reportId',
   path: '/admin/report/$reportId',
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/client/support': typeof ClientSupportRoute
   '/admin/leads/$leadId': typeof AdminLeadsLeadIdRoute
   '/admin/report/$reportId': typeof AdminReportReportIdRoute
+  '/api/public/seed-demo-client': typeof ApiPublicSeedDemoClientRoute
   '/admin/leads/': typeof AdminLeadsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/client/support': typeof ClientSupportRoute
   '/admin/leads/$leadId': typeof AdminLeadsLeadIdRoute
   '/admin/report/$reportId': typeof AdminReportReportIdRoute
+  '/api/public/seed-demo-client': typeof ApiPublicSeedDemoClientRoute
   '/admin/leads': typeof AdminLeadsIndexRoute
 }
 export interface FileRoutesById {
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/client/support': typeof ClientSupportRoute
   '/admin/leads/$leadId': typeof AdminLeadsLeadIdRoute
   '/admin/report/$reportId': typeof AdminReportReportIdRoute
+  '/api/public/seed-demo-client': typeof ApiPublicSeedDemoClientRoute
   '/admin/leads/': typeof AdminLeadsIndexRoute
 }
 export interface FileRouteTypes {
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/client/support'
     | '/admin/leads/$leadId'
     | '/admin/report/$reportId'
+    | '/api/public/seed-demo-client'
     | '/admin/leads/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -242,6 +252,7 @@ export interface FileRouteTypes {
     | '/client/support'
     | '/admin/leads/$leadId'
     | '/admin/report/$reportId'
+    | '/api/public/seed-demo-client'
     | '/admin/leads'
   id:
     | '__root__'
@@ -264,6 +275,7 @@ export interface FileRouteTypes {
     | '/client/support'
     | '/admin/leads/$leadId'
     | '/admin/report/$reportId'
+    | '/api/public/seed-demo-client'
     | '/admin/leads/'
   fileRoutesById: FileRoutesById
 }
@@ -287,6 +299,7 @@ export interface RootRouteChildren {
   ClientSupportRoute: typeof ClientSupportRoute
   AdminLeadsLeadIdRoute: typeof AdminLeadsLeadIdRoute
   AdminReportReportIdRoute: typeof AdminReportReportIdRoute
+  ApiPublicSeedDemoClientRoute: typeof ApiPublicSeedDemoClientRoute
   AdminLeadsIndexRoute: typeof AdminLeadsIndexRoute
 }
 
@@ -418,6 +431,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLeadsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/seed-demo-client': {
+      id: '/api/public/seed-demo-client'
+      path: '/api/public/seed-demo-client'
+      fullPath: '/api/public/seed-demo-client'
+      preLoaderRoute: typeof ApiPublicSeedDemoClientRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/report/$reportId': {
       id: '/admin/report/$reportId'
       path: '/admin/report/$reportId'
@@ -455,6 +475,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClientSupportRoute: ClientSupportRoute,
   AdminLeadsLeadIdRoute: AdminLeadsLeadIdRoute,
   AdminReportReportIdRoute: AdminReportReportIdRoute,
+  ApiPublicSeedDemoClientRoute: ApiPublicSeedDemoClientRoute,
   AdminLeadsIndexRoute: AdminLeadsIndexRoute,
 }
 export const routeTree = rootRouteImport
