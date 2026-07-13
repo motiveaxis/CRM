@@ -104,6 +104,28 @@ function Pipeline() {
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const { error } = await supabase.from("leads").update({ status }).eq("id", id);
       if (error) throw error;
+
+      // Sync latest report for this lead to match pipeline stage
+      const reportPatch: Record<string, any> | null =
+        status === "report_qc_approved"
+          ? { qc_status: "approved", qc_approved_at: new Date().toISOString(), report_status: "qc_approved" }
+          : status === "report_sent"
+          ? { report_status: "sent", sent_at: new Date().toISOString() }
+          : status === "report_generated"
+          ? { qc_status: "pending", report_status: "qc_pending" }
+          : null;
+      if (reportPatch) {
+        const { data: latest } = await supabase
+          .from("reports")
+          .select("id")
+          .eq("lead_id", id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (latest?.id) {
+          await supabase.from("reports").update(reportPatch as any).eq("id", latest.id);
+        }
+      }
     },
     onMutate: async ({ id, status }) => {
       await qc.cancelQueries({ queryKey: ["pipeline-leads"] });
@@ -121,6 +143,7 @@ function Pipeline() {
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ["pipeline-leads"] });
       qc.invalidateQueries({ queryKey: ["leads"] });
+      qc.invalidateQueries({ queryKey: ["reports"] });
     },
   });
 
